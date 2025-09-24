@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Grilled & Bites Burger | Fresh & Juicy Burgers</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <style>
+    :root {
+      --orange: #ff7f11;
+      --green: #2d6a4f;
+      --light-green: #95d5b2;
+      --white: #fff;
+      --dark: #222;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: var(--light-green);
+      color: var(--dark);
+    }
+
+    /* Navbar */
+    header {
+      background: var(--green);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      color: var(--orange);
+      font-weight: 800;
+    }
+
+    nav a {
+      color: var(--white);
+      margin: 0 1rem;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+
+    nav a:hover {
+      color: var(--orange);
+    }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 5rem 2rem;
+      background: linear-gradient(to right, var(--orange), var(--green));
+      color: var(--white);
+    }
+
+    .hero h2 {
+      font-size: 3rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+    }
+
+    .hero button {
+      background: var(--white);
+      color: var(--green);
+      border: none;
+      padding: 0.8rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .hero button:hover {
+      background: var(--orange);
+      color: var(--white);
+    }
+
+    /* Menu Section */
+    .menu {
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+
+    .menu h2 {
+      font-size: 2rem;
+      color: var(--green);
+      margin-bottom: 2rem;
+    }
+
+    .menu-items {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+    }
+
+    .menu-card {
+      background: var(--white);
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: transform 0.3s;
+    }
+
+    .menu-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .menu-card img {
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+    }
+
+    .menu-card h3 {
+      color: var(--orange);
+      margin-bottom: 0.5rem;
+    }
+
+    /* Footer */
+    footer {
+      background: var(--green);
+      color: var(--white);
+      text-align: center;
+      padding: 1.5rem;
+      margin-top: 3rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <header>
+    <h1>Grilled & Bites Burger</h1>
+    <nav>
+      <a href="#">Home</a>
+      <a href="#">Menu</a>
+      <a href="#">About</a>
+      <a href="#">Contact</a>
+      <a href="*">Log In</a>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h2>Where every bites count</h2>
+    <p></p>
+    <button>Order Now</button>
+  </section>
+
+  <!-- Menu Highlights -->
+  <section class="menu">
+    <h2>Our Bestsellers</h2>
+    <div class="menu-items">
+      <div class="menu-card">
+        <img src="https://via.placeholder.com/250x150" alt="Classic Burger">
+        <h3>Classic Beef Burger</h3>
+        <p>Juicy grilled beef patty, lettuce, tomato, and our signature sauce.</p>
+      </div>
+      <div class="menu-card">
+        <img src="https://via.placeholder.com/250x150" alt="Cheese Burger">
+        <h3>Cheese Overload</h3>
+        <p>Melty cheddar stacked on a juicy patty — a cheesy delight!</p>
+      </div>
+      <div class="menu-card">
+        <img src="https://via.placeholder.com/250x150" alt="Veggie Burger">
+        <h3>Veggie Burger</h3>
+        <p>A healthy and tasty choice packed with fresh greens & spices.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2025 Grilled & Burger Bites. All rights reserved.</p>
+  </footer>
+
+
+
+</body>
+</html>
+

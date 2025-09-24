@@ -1,0 +1,76 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Login{% endblock %}
+
+{% block body %}
+<style>
+    body {
+        background: #f0f2f5;
+        font-family: 'Arial', sans-serif;
+    }
+    .login-container {
+        max-width: 400px;
+        margin: 80px auto;
+        padding: 40px;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0px 0px 15px rgba(0,0,0,0.1);
+    }
+    .login-container h2 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #333;
+    }
+    .login-container form {
+        display: flex;
+        flex-direction: column;
+    }
+    .login-container input[type="text"],
+    .login-container input[type="password"] {
+        padding: 12px;
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+    .login-container button {
+        padding: 12px;
+        background: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .login-container button:hover {
+        background: #0056b3;
+    }
+    .login-footer {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 14px;
+    }
+    .login-footer a {
+        color: #007bff;
+        text-decoration: none;
+    }
+    .login-footer a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="login-container">
+    <h2>Hello {{ controller_name }}! ✅</h2>
+
+    <form action="#" method="post">
+        <input type="text" name="username" placeholder="Username or Email" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button type="submit">Login</button>
+    </form>
+
+    <div class="login-footer">
+        <p>Don't have an account? <a href="#">Register here</a></p>
+    </div>
+</div>
+{% endblock %}

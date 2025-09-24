@@ -1,0 +1,227 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Welcome to Grilled & Bites Burger{% endblock %}
+
+{% block body %}
+<!-- Hero Section -->
+<section class="hero">
+    <h2>Where every bite counts</h2>
+    <p>Made with love, grilled to perfection. Taste the difference today!</p>
+    <button onclick="scrollToMenu()">Order Now</button>
+</section>
+
+<!-- Features Section -->
+<section class="features">
+    <div class="container">
+        <h2>Why Choose Us?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🔥</div>
+                <h3>Fresh Grilled</h3>
+                <p>Every burger is grilled fresh to order using premium ingredients</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Fast Service</h3>
+                <p>Quick preparation without compromising on quality or taste</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">❤️</div>
+                <h3>Made with Love</h3>
+                <p>Every burger is crafted with passion and attention to detail</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Menu Highlights -->
+<section class="menu" id="menu">
+    <h2>Our Bestsellers</h2>
+    <div class="menu-items">
+        <div class="menu-card">
+            <img src="https://via.placeholder.com/250x150/ff7f11/ffffff?text=Classic+Burger" alt="Classic Burger">
+            <h3>Classic Beef Burger</h3>
+            <p>Juicy grilled beef patty, lettuce, tomato, and our signature sauce.</p>
+            <div class="price">$12.99</div>
+        </div>
+        <div class="menu-card">
+            <img src="https://via.placeholder.com/250x150/2d6a4f/ffffff?text=Cheese+Burger" alt="Cheese Burger">
+            <h3>Cheese Overload</h3>
+            <p>Melty cheddar stacked on a juicy patty — a cheesy delight!</p>
+            <div class="price">$14.99</div>
+        </div>
+        <div class="menu-card">
+            <img src="https://via.placeholder.com/250x150/95d5b2/2d6a4f?text=Veggie+Burger" alt="Veggie Burger">
+            <h3>Veggie Burger</h3>
+            <p>A healthy and tasty choice packed with fresh greens & spices.</p>
+            <div class="price">$11.99</div>
+        </div>
+    </div>
+</section>
+
+
+<style>
+    .features {
+        padding: 4rem 2rem;
+        background: var(--white);
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .features h2 {
+        text-align: center;
+        font-size: 2.5rem;
+        color: var(--green);
+        margin-bottom: 3rem;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .feature-card {
+        text-align: center;
+        padding: 2rem;
+        background: var(--light-green);
+        border-radius: 12px;
+        transition: transform 0.3s;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .feature-card h3 {
+        color: var(--green);
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .menu-card {
+        position: relative;
+    }
+
+    .price {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: var(--orange);
+        color: var(--white);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+    }
+
+    .about {
+        padding: 4rem 2rem;
+        background: var(--light-green);
+    }
+
+    .about-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+        align-items: center;
+    }
+
+    .about h2 {
+        color: var(--green);
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .about p {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+        color: var(--dark);
+    }
+
+    .cta-button {
+        background: var(--orange);
+        color: var(--white);
+        border: none;
+        padding: 1rem 2rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 30px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .cta-button:hover {
+        background: var(--green);
+    }
+
+    .about-image img {
+        width: 100%;
+        border-radius: 12px;
+    }
+
+    .contact {
+        padding: 4rem 2rem;
+        background: var(--green);
+        color: var(--white);
+    }
+
+    .contact h2 {
+        text-align: center;
+        font-size: 2.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .contact-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+    }
+
+    .contact-item {
+        text-align: center;
+        padding: 1.5rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+    }
+
+    .contact-item h3 {
+        color: var(--orange);
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+    }
+
+    @media (max-width: 768px) {
+        .about-content {
+            grid-template-columns: 1fr;
+        }
+        
+        .hero h2 {
+            font-size: 2rem;
+        }
+        
+        .features h2,
+        .about h2,
+        .contact h2 {
+            font-size: 2rem;
+        }
+    }
+</style>
+
+<script>
+    function scrollToMenu() {
+        document.getElementById('menu').scrollIntoView({
+            behavior: 'smooth'
+        });
+    }
+</script>
+{% endblock %}
+
