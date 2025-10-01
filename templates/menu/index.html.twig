@@ -1,0 +1,931 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Our Menu - Grilled & Bites Burger{% endblock %}
+
+{% block body %}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Arial', sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: #f8f9fa;
+    }
+
+    /* Color Variables */
+    :root {
+        --primary-orange: #FF6B35;
+        --secondary-orange: #FF8C42;
+        --light-orange: #FFB366;
+        --primary-green: #2D5016;
+        --secondary-green: #4A7C59;
+        --light-green: #7BA05B;
+        --accent-green: #90EE90;
+        --white: #FFFFFF;
+        --dark-gray: #2C2C2C;
+        --light-gray: #F5F5F5;
+        --border-color: #E0E0E0;
+    }
+
+    /* Header */
+    .header {
+        background: linear-gradient(135deg, var(--primary-orange), var(--secondary-orange));
+        color: var(--white);
+        padding: 1rem 0;
+        position: fixed;
+        width: 100%;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .nav-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 2rem;
+    }
+
+    .logo {
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--white);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .logo-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #FF6B35, #FF8C42);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+        overflow: visible;
+    }
+
+    /* Bottom Bun */
+    .logo-icon::before {
+        content: '';
+        position: absolute;
+        width: 45px;
+        height: 15px;
+        background: linear-gradient(to bottom, #FFB366, #FF8C42);
+        border-radius: 8px 8px 20px 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        top: 35px;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 2px solid #2C2C2C;
+    }
+
+    /* Patty */
+    .logo-icon .patty {
+        position: absolute;
+        width: 40px;
+        height: 8px;
+        background: linear-gradient(to bottom, #8B4513, #654321);
+        border-radius: 4px;
+        top: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        border: 2px solid #2C2C2C;
+    }
+
+    /* Tomato */
+    .logo-icon .tomato {
+        position: absolute;
+        width: 38px;
+        height: 6px;
+        background: linear-gradient(to bottom, #FF4500, #DC143C);
+        border-radius: 0 0 15px 15px;
+        top: 25px;
+        left: 50%;
+        transform: translateX(-50%);
+        box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+        border: 2px solid #2C2C2C;
+    }
+
+    /* Lettuce */
+    .logo-icon .lettuce {
+        position: absolute;
+        width: 36px;
+        height: 6px;
+        background: linear-gradient(to bottom, #32CD32, #228B22);
+        border-radius: 0 0 15px 15px;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+        border: 2px solid #2C2C2C;
+    }
+
+    /* Top Bun */
+    .logo-icon .top-bun {
+        position: absolute;
+        width: 42px;
+        height: 18px;
+        background: linear-gradient(to bottom, #FFB366, #FF8C42);
+        border-radius: 20px 20px 8px 8px;
+        top: 5px;
+        left: 50%;
+        transform: translateX(-50%);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        border: 2px solid #2C2C2C;
+    }
+
+    /* Sesame Seeds */
+    .logo-icon .sesame {
+        position: absolute;
+        width: 3px;
+        height: 2px;
+        background: #8B4513;
+        border-radius: 50%;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        box-shadow: 
+            8px 2px 0 #8B4513,
+            -8px 2px 0 #8B4513,
+            4px 4px 0 #8B4513,
+            -4px 4px 0 #8B4513,
+            12px 4px 0 #8B4513,
+            -12px 4px 0 #8B4513;
+    }
+
+    /* Flames */
+    .logo-icon .flame {
+        position: absolute;
+        top: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-bottom: 15px solid #FFD700;
+        animation: flame 1.5s ease-in-out infinite alternate;
+    }
+
+    .logo-icon .flame:nth-child(2) {
+        left: calc(50% - 12px);
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-bottom: 18px solid #FF8C42;
+        animation-delay: 0.3s;
+    }
+
+    .logo-icon .flame:nth-child(3) {
+        left: calc(50% + 12px);
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-bottom: 12px solid #FF4500;
+        animation-delay: 0.6s;
+    }
+
+    @keyframes flame {
+        0% { 
+            transform: translateX(-50%) scale(1) rotate(-3deg); 
+            border-bottom-color: #FFD700;
+        }
+        50% { 
+            transform: translateX(-50%) scale(1.1) rotate(0deg); 
+            border-bottom-color: #FF8C42;
+        }
+        100% { 
+            transform: translateX(-50%) scale(1.05) rotate(3deg); 
+            border-bottom-color: #FF4500;
+        }
+    }
+
+    .logo-text {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        line-height: 1.2;
+    }
+
+    .logo-main {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: var(--white);
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .logo-sub {
+        font-size: 0.7rem;
+        font-weight: 500;
+        color: var(--accent-green);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .nav-menu {
+        display: flex;
+        list-style: none;
+        gap: 2rem;
+    }
+
+    .nav-menu a {
+        color: var(--white);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+
+    .nav-menu a:hover {
+        color: var(--accent-green);
+    }
+
+    /* Main Content */
+    .main-content {
+        margin-top: 80px;
+        padding: 2rem 0;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .page-title {
+        text-align: center;
+        font-size: 3rem;
+        color: var(--primary-green);
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .page-subtitle {
+        text-align: center;
+        font-size: 1.2rem;
+        color: var(--dark-gray);
+        margin-bottom: 3rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Filter Section */
+    .filter-section {
+        background: var(--white);
+        padding: 1.5rem;
+        border-radius: 15px;
+        box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+        border: 1px solid var(--border-color);
+        max-width: 800px;
+        margin-left: 0;
+        margin-right: auto;
+    }
+
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        align-items: end;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .filter-group label {
+        font-weight: 600;
+        color: var(--primary-green);
+        margin-bottom: 0.4rem;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .filter-input {
+        padding: 0.6rem 0.8rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        background: var(--white);
+    }
+
+    .filter-input:focus {
+        outline: none;
+        border-color: var(--primary-orange);
+        box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+    }
+
+    .search-input {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23666'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1.2rem;
+        padding-right: 3rem;
+    }
+
+    /* Menu Cards */
+    .menu-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .menu-card {
+        background: var(--white);
+        border-radius: 20px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: 1px solid var(--border-color);
+        position: relative;
+    }
+
+    .menu-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+
+    .menu-card-image {
+        position: relative;
+        height: 200px;
+        overflow: hidden;
+    }
+
+    .menu-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .menu-card:hover img {
+        transform: scale(1.05);
+    }
+
+    .menu-category-badge {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        background: var(--primary-orange);
+        color: var(--white);
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .menu-tag-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: var(--primary-green);
+        color: var(--white);
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .menu-info {
+        padding: 1.5rem;
+    }
+
+    .menu-info h3 {
+        font-size: 1.4rem;
+        color: var(--primary-green);
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+    }
+
+    .menu-calories {
+        color: var(--dark-gray);
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .menu-calories::before {
+        content: "🔥";
+        font-size: 0.8rem;
+    }
+
+    .menu-price {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-orange);
+        text-align: right;
+    }
+
+    .menu-price::before {
+        content: "₱";
+        font-size: 1.2rem;
+    }
+
+    /* No Results */
+    .no-results {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--dark-gray);
+    }
+
+    .no-results h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: var(--primary-green);
+    }
+
+    .no-results p {
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    .reset-filters {
+        background: var(--primary-orange);
+        color: var(--white);
+        padding: 0.8rem 2rem;
+        border: none;
+        border-radius: 25px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .reset-filters:hover {
+        background: var(--secondary-orange);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .nav-container {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .nav-menu {
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+        }
+
+        .logo-icon::before {
+            font-size: 1.4rem;
+        }
+
+        .logo-main {
+            font-size: 1rem;
+        }
+
+        .logo-sub {
+            font-size: 0.6rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .filter-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .menu-cards {
+            grid-template-columns: 1fr;
+        }
+
+        .container {
+            padding: 0 1rem;
+        }
+    }
+
+    /* Loading Animation */
+    .loading {
+        display: none;
+        text-align: center;
+        padding: 2rem;
+        color: var(--primary-orange);
+    }
+
+    .spinner {
+        border: 3px solid var(--light-gray);
+        border-top: 3px solid var(--primary-orange);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+
+<!-- Header -->
+<header class="header">
+    <div class="nav-container">
+        <a href="/" class="logo">
+            <div class="logo-icon">
+                <div class="patty"></div>
+                <div class="tomato"></div>
+                <div class="lettuce"></div>
+                <div class="top-bun"></div>
+                <div class="sesame"></div>
+                <div class="flame"></div>
+                <div class="flame"></div>
+                <div class="flame"></div>
+            </div>
+            <div class="logo-text">
+                <div class="logo-main">Grilled & Bites</div>
+                <div class="logo-sub">Burgers</div>
+            </div>
+        </a>
+        <nav>
+            <ul class="nav-menu">
+                <li><a href="/">Home</a></li>
+                <li><a href="/menu" style="color: var(--accent-green);">Menu</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main class="main-content" style="position:relative;">
+    <!-- Decorative SVG background shapes -->
+    <div style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;">
+        <svg width="100%" height="100%" viewBox="0 0 1200 400" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:absolute;top:-60px;left:0;">
+            <ellipse cx="200" cy="100" rx="180" ry="60" fill="#FFB366" opacity="0.18"/>
+            <ellipse cx="1000" cy="320" rx="160" ry="50" fill="#90EE90" opacity="0.15"/>
+            <ellipse cx="600" cy="60" rx="220" ry="70" fill="#FF8C42" opacity="0.10"/>
+            <ellipse cx="900" cy="80" rx="120" ry="40" fill="#2D5016" opacity="0.08"/>
+        </svg>
+    </div>
+    <div class="container" style="position:relative;z-index:1;">
+        <h1 class="page-title" style="position:relative;">
+            <span style="display:inline-block;position:relative;z-index:2;">Our Delicious Menu</span>
+            <span style="position:absolute;left:50%;top:100%;transform:translate(-50%,0);width:120px;height:12px;background:linear-gradient(90deg,#FFB366 40%,#90EE90 100%);border-radius:8px;opacity:0.3;z-index:1;"></span>
+        </h1>
+        <p class="page-subtitle" style="position:relative;z-index:2;">
+            Discover our mouth-watering selection of burgers, hotdogs, fries, and refreshing drinks. All made with fresh, quality ingredients!
+        </p>
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label for="category">Category</label>
+                    <select id="category" class="filter-input" onchange="filterMenu()">
+                        <option value="all">All Categories</option>
+                        <option value="burger">🍔 Burgers</option>
+                        <option value="hotdog">🌭 Hotdogs</option>
+                        <option value="fries">🍟 Fries</option>
+                        <option value="drink">🥤 Drinks</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="search">Search Items</label>
+                    <input type="text" id="search" class="filter-input search-input" onkeyup="filterMenu()" placeholder="Search for your favorite...">
+                </div>
+                <div class="filter-group">
+                    <label for="tag">Special Tags</label>
+                    <select id="tag" class="filter-input" onchange="filterMenu()">
+                        <option value="all">All Tags</option>
+                        <option value="spicy">🌶️ Spicy</option>
+                        <option value="veggie">🥬 Veggie</option>
+                        <option value="deluxe">⭐ Deluxe</option>
+                        <option value="classic">👑 Classic</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Finding your perfect meal...</p>
+        </div>
+        <!-- Menu Cards -->
+        <div id="menuCards" class="menu-cards">
+            <!-- Burgers -->
+            <div class="menu-card" data-category="burger" data-tags="classic">
+                <div class="menu-card-image">
+                    <img src="https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=400&q=80" alt="Classic Beef Burger">
+                    <div class="menu-category-badge">Burger</div>
+                    <div class="menu-tag-badge">Classic</div>
+                </div>
+                <div class="menu-info">
+                    <h3>Classic Beef Burger</h3>
+                    <div class="menu-calories">550 calories</div>
+                    <div class="menu-price">120</div>
+                </div>
+            </div>
+
+            <div class="menu-card" data-category="burger" data-tags="spicy">
+                <div class="menu-card-image">
+                    <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80" alt="Spicy Burger">
+                    <div class="menu-category-badge">Burger</div>
+                    <div class="menu-tag-badge">Spicy</div>
+                </div>
+                <div class="menu-info">
+                    <h3>Spicy Jalapeño Burger</h3>
+                    <div class="menu-calories">650 calories</div>
+                    <div class="menu-price">140</div>
+                </div>
+            </div>
+
+            <div class="menu-card" data-category="burger" data-tags="veggie">
+                <div class="menu-card-image">
+                    <img src="https://images.unsplash.com/photo-1464306076886-debede1a7c94?auto=format&fit=crop&w=400&q=80" alt="Veggie Burger">
+                    <div class="menu-category-badge">Burger</div>
+                    <div class="menu-tag-badge">Veggie</div>
+                </div>
+                <div class="menu-info">
+                    <h3>Garden Veggie Burger</h3>
+                    <div class="menu-calories">400 calories</div>
+                    <div class="menu-price">125</div>
+                </div>
+            </div>
+
+            <div class="menu-card" data-category="burger" data-tags="deluxe">
+                <div class="menu-card-image">
+                    <img src="https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80" alt="Deluxe Burger">
+                    <div class="menu-category-badge">Burger</div>
+                    <div class="menu-tag-badge">Deluxe</div>
+                </div>
+                <div class="menu-info">
+                    <h3>Double Deluxe Burger</h3>
+                    <div class="menu-calories">950 calories</div>
+                    <div class="menu-price">200</div>
+                </div>
+            </div>
+
+            <!-- Hotdogs -->
+            <div class="menu-card" data-category="hotdog" data-tags="classic">
+                <div class="menu-card-image">
+                    <img src="https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=crop&w=400&q=80" alt="Classic Hotdog">
+                    <div class="menu-category-badge">Hotdog</div>
+                    <div class="menu-tag-badge">Classic</div>
+                </div>
+                <div class="menu-info">
+                    <h3>Classic Hotdog</h3>
+                    <div class="menu-calories">400 calories</div>
+                    <div class="menu-price">60</div>
+                </div>
+            </div>
+
+            <div class="menu-card" data-category="hotdog" data-tags="spicy">
+                <div class="menu-card-image">
+                    <img src="https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80" alt="Spicy Hotdog">
+                    <div class="menu-category-badge">Hotdog</div>
+                    <div class="menu-tag-badge">Spicy</div>
+                </div>
+                <div class="menu-info">
+                    <h3>Spicy Chili Hotdog</h3>
+                    <div class="menu-calories">530 calories</div>
+                    <div class="menu-price">80</div>
+                </div>
+            </div>
+
+            <div class="menu-card" data-category="hotdog" data-tags="deluxe">
+                <div class="menu-card-image">
+                    <img src="https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=crop&w=400&q=80" alt="Deluxe Hotdog">
+                    <div class="menu-category-badge">Hotdog</div>
+                    <div class="menu-tag-badge">Deluxe</div>
+                </div>
+                <div class="menu-info">
+                    <h3>Loaded Deluxe Hotdog</h3>
+                    <div class="menu-calories">800 calories</div>
+                    <div class="menu-price">120</div>
+                </div>
+            </div>
+
+            <!-- Fries -->
+            <div class="menu-card" data-category="fries" data-tags="classic">
+                <div class="menu-card-image">
+                    <img src="https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=400&q=80" alt="Classic Fries">
+                    <div class="menu-category-badge">Fries</div>
+                    <div class="menu-tag-badge">Classic</div>
+                </div>
+                <div class="menu-info">
+                    <h3>Golden French Fries</h3>
+                    <div class="menu-calories">350 calories</div>
+                    <div class="menu-price">50</div>
+                </div>
+            </div>
+
+            <div class="menu-card" data-category="fries" data-tags="spicy">
+                <div class="menu-card-image">
+                    <img src="https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=400&q=80" alt="Spicy Fries">
+                    <div class="menu-category-badge">Fries</div>
+                    <div class="menu-tag-badge">Spicy</div>
+                </div>
+                <div class="menu-info">
+                    <h3>Spicy Cajun Fries</h3>
+                    <div class="menu-calories">410 calories</div>
+                    <div class="menu-price">65</div>
+                </div>
+            </div>
+
+            <div class="menu-card" data-category="fries" data-tags="deluxe">
+                <div class="menu-card-image">
+                    <img src="https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=400&q=80" alt="Loaded Fries">
+                    <div class="menu-category-badge">Fries</div>
+                    <div class="menu-tag-badge">Deluxe</div>
+                </div>
+                <div class="menu-info">
+                    <h3>Loaded Cheese Fries</h3>
+                    <div class="menu-calories">600 calories</div>
+                    <div class="menu-price">120</div>
+                </div>
+            </div>
+
+            <!-- Drinks -->
+            <div class="menu-card" data-category="drink" data-tags="classic">
+                <div class="menu-card-image">
+                    <img src="https://images.unsplash.com/photo-1581636625402-29b2a704ef13?auto=format&fit=crop&w=400&q=80" alt="Coke">
+                    <div class="menu-category-badge">Drink</div>
+                    <div class="menu-tag-badge">Classic</div>
+                </div>
+                <div class="menu-info">
+                    <h3>Classic Cola</h3>
+                    <div class="menu-calories">140 calories</div>
+                    <div class="menu-price">35</div>
+                </div>
+            </div>
+
+            <div class="menu-card" data-category="drink" data-tags="veggie">
+                <div class="menu-card-image">
+                    <img src="https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=400&q=80" alt="Green Tea">
+                    <div class="menu-category-badge">Drink</div>
+                    <div class="menu-tag-badge">Veggie</div>
+                </div>
+                <div class="menu-info">
+                    <h3>Fresh Green Tea</h3>
+                    <div class="menu-calories">5 calories</div>
+                    <div class="menu-price">35</div>
+                </div>
+            </div>
+
+            <div class="menu-card" data-category="drink" data-tags="deluxe">
+                <div class="menu-card-image">
+                    <img src="https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=400&q=80" alt="Milkshake">
+                    <div class="menu-category-badge">Drink</div>
+                    <div class="menu-tag-badge">Deluxe</div>
+                </div>
+                <div class="menu-info">
+                    <h3>Chocolate Milkshake</h3>
+                    <div class="menu-calories">300 calories</div>
+                    <div class="menu-price">80</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- No Results Message -->
+        <div class="no-results" id="noResults" style="display: none;">
+            <h3>No items found</h3>
+            <p>We couldn't find any items matching your search criteria.</p>
+            <a href="#" class="reset-filters" onclick="resetFilters()">Reset Filters</a>
+        </div>
+    </div>
+</main>
+<script>
+    // Enhanced filtering with smooth animations and better UX
+    function filterMenu() {
+        const category = document.getElementById('category').value;
+        const search = document.getElementById('search').value.toLowerCase();
+        const tag = document.getElementById('tag').value;
+        const cards = document.querySelectorAll('.menu-card');
+        const noResults = document.getElementById('noResults');
+        const loading = document.getElementById('loading');
+        
+        // Show loading animation
+        loading.style.display = 'block';
+        noResults.style.display = 'none';
+        
+        // Hide all cards first
+        cards.forEach(card => {
+            card.style.display = 'none';
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+        });
+        
+        // Filter cards with delay for smooth animation
+        setTimeout(() => {
+            let visibleCount = 0;
+            
+            cards.forEach(card => {
+                const cardCategory = card.getAttribute('data-category');
+                const cardTags = card.getAttribute('data-tags');
+                const name = card.querySelector('h3').textContent.toLowerCase();
+                
+                let show = true;
+                
+                if (category !== 'all' && cardCategory !== category) show = false;
+                if (tag !== 'all' && cardTags !== tag) show = false;
+                if (search && !name.includes(search)) show = false;
+                
+                if (show) {
+                    card.style.display = 'block';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                    visibleCount++;
+                }
+            });
+            
+            // Show no results message if no items match
+            if (visibleCount === 0) {
+                noResults.style.display = 'block';
+            }
+            
+            loading.style.display = 'none';
+        }, 300);
+    }
+    
+    // Reset all filters
+    function resetFilters() {
+        document.getElementById('category').value = 'all';
+        document.getElementById('search').value = '';
+        document.getElementById('tag').value = 'all';
+        filterMenu();
+    }
+    
+    // Add smooth scroll behavior for better UX
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize the menu display
+        filterMenu();
+        
+        // Add smooth scrolling to anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Add keyboard navigation support
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                resetFilters();
+            }
+        });
+    });
+    
+    // Add search suggestions (optional enhancement)
+    function addSearchSuggestions() {
+        const searchInput = document.getElementById('search');
+        const suggestions = [
+            'burger', 'hotdog', 'fries', 'drink',
+            'spicy', 'veggie', 'deluxe', 'classic',
+            'beef', 'chicken', 'cheese', 'bacon'
+        ];
+        
+        searchInput.addEventListener('input', function() {
+            const value = this.value.toLowerCase();
+            if (value.length > 1) {
+                // You could implement autocomplete here
+                console.log('Searching for:', value);
+            }
+        });
+    }
+    
+    // Initialize search suggestions
+    addSearchSuggestions();
+</script>
+</div>
+{% endblock %}
