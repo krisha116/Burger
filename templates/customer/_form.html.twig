@@ -1,0 +1,29 @@
+{{ form_start(form) }}
+    <div class="form-group">
+        {{ form_label(form.Name, 'Name') }}
+        {{ form_widget(form.Name, { 'attr': {'placeholder': 'Enter customer name'} }) }}
+        {{ form_errors(form.Name) }}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.Email, 'Email') }}
+        {{ form_widget(form.Email, { 'attr': {'placeholder': 'Enter email address', 'type': 'email'} }) }}
+        {{ form_errors(form.Email) }}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.Phone, 'Phone') }}
+        {{ form_widget(form.Phone, { 'attr': {'placeholder': 'Enter phone number', 'type': 'tel'} }) }}
+        {{ form_errors(form.Phone) }}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.createAt, 'Date & Time') }}
+        {{ form_widget(form.createAt, { 'attr': {'placeholder': 'Select date and time'} }) }}
+        {{ form_errors(form.createAt) }}
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn">{{ button_label|default('Save Customer') }}</button>
+    </div>
+{{ form_end(form) }}

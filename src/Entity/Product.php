@@ -3,7 +3,11 @@
 namespace App\Entity;
 
 use App\Repository\ProductRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
@@ -13,17 +17,35 @@ class Product
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 100)]
-    private ?string $name = null;
-
     #[ORM\Column(length: 255)]
-    private ?string $description = null;
+    private ?string $Name = null;
+
+    #[ORM\Column(type: Types::TEXT)]
+    private ?string $Description = null;
 
     #[ORM\Column]
-    private ?float $price = null;
+    private ?float $Price = null;
 
-    #[ORM\Column(length: 255)]
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $Datetime = null;
+
+    #[ORM\ManyToOne(inversedBy: 'products')]
+    private ?Category $Category = null;
+
+     #[ORM\Column(length: 255)]
     private ?string $image = null;
+
+     /**
+      * @var Collection<int, Order>
+      */
+     #[ORM\ManyToMany(targetEntity: Order::class, mappedBy: 'products')]
+     private Collection $orders;
+
+     public function __construct()
+     {
+         $this->orders = new ArrayCollection();
+     }
 
     public function getId(): ?int
     {
@@ -32,49 +54,101 @@ class Product
 
     public function getName(): ?string
     {
-        return $this->name;
+        return $this->Name;
     }
 
-    public function setName(string $name): static
+    public function setName(string $Name): static
     {
-        $this->name = $name;
+        $this->Name = $Name;
 
         return $this;
     }
 
     public function getDescription(): ?string
     {
-        return $this->description;
+        return $this->Description;
     }
 
-    public function setDescription(string $description): static
+    public function setDescription(string $Description): static
     {
-        $this->description = $description;
+        $this->Description = $Description;
 
         return $this;
     }
 
     public function getPrice(): ?float
     {
-        return $this->price;
+        return $this->Price;
     }
 
-    public function setPrice(float $price): static
+    public function setPrice(float $Price): static
     {
-        $this->price = $price;
+        $this->Price = $Price;
 
         return $this;
     }
 
-    public function getImage(): ?string
+
+    public function getDatetime(): ?\DateTimeImmutable
     {
-        return $this->image;
+        return $this->Datetime;
     }
 
-    public function setImage(string $image): static
+    public function setDatetime(\DateTimeImmutable $Datetime): static
     {
-        $this->image = $image;
+        $this->Datetime = $Datetime;
 
         return $this;
     }
+
+    public function getCategory(): ?Category
+    {
+        return $this->Category;
+    }
+
+    public function setCategory(?Category $Category): static
+    {
+        $this->Category = $Category;
+
+        return $this;
+    }
+
+    public function getimage()
+    {
+    return $this->image;
+    }
+
+    public function setimage($image): static
+    {
+    $this->image = $image;
+    return $this;
+    }
+
+    /**
+     * @return Collection<int, Order>
+     */
+    public function getOrders(): Collection
+    {
+        return $this->orders;
+    }
+
+    public function addOrder(Order $order): static
+    {
+        if (!$this->orders->contains($order)) {
+            $this->orders->add($order);
+            $order->addProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrder(Order $order): static
+    {
+        if ($this->orders->removeElement($order)) {
+            $order->removeProduct($this);
+        }
+
+        return $this;
+    }
+
 }

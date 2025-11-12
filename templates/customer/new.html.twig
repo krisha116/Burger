@@ -1,0 +1,274 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Customer{% endblock %}
+
+{% block body %}
+<style>
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #FFA500, #FF7F50, #FF6347);
+        color: #2c3e50;
+        margin: 0;
+        padding: 0;
+        line-height: 1.6;
+        min-height: 100vh;
+    }
+
+    .top-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .search-bar {
+        flex: 1;
+        max-width: 400px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        border: none;
+        border-radius: 25px;
+        background: white;
+        font-size: 0.9rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        font-size: 1rem;
+    }
+
+    .nav-icons {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .nav-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        position: relative;
+        cursor: pointer;
+    }
+
+    .notification-dot {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 8px;
+        height: 8px;
+        background: #dc3545;
+        border-radius: 50%;
+    }
+
+    .profile-pic {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #FF7F50, #FFA500);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        font-weight: 300;
+        color: white;
+        margin: 0;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .form-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        padding: 2rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #495057;
+        font-size: 0.9rem;
+    }
+
+    input, select, textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 1rem;
+        transition: border-color 0.2s ease;
+        box-sizing: border-box;
+    }
+
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: #FF7F50;
+        box-shadow: 0 0 0 2px rgba(255, 127, 80, 0.2);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, #FF7F50, #FFA500);
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(255, 127, 80, 0.3);
+    }
+
+    .btn:hover {
+        background: linear-gradient(135deg, #FF6347, #FF8C00);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(255, 127, 80, 0.4);
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #FF8C00, #FFA500);
+        box-shadow: 0 2px 4px rgba(255, 140, 0, 0.3);
+    }
+
+    .btn-secondary:hover {
+        background: linear-gradient(135deg, #FF7F00, #FF8C00);
+        box-shadow: 0 4px 8px rgba(255, 140, 0, 0.4);
+    }
+
+    .form-errors {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    @media (max-width: 768px) {
+        .top-nav {
+            padding: 1rem;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .search-bar {
+            max-width: 100%;
+        }
+        
+        .container {
+            margin: 1rem auto;
+            padding: 0 1rem;
+        }
+        
+        .page-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
+        }
+        
+        .form-container {
+            padding: 1.5rem;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+
+
+
+<div class="container">
+    <div class="page-header">
+        <h1>New Customer</h1>
+        <a href="{{ path('app_customer_index') }}" class="btn btn-secondary">← Back to Customers</a>
+    </div>
+
+    <div class="form-container">
+        {{ form_start(form) }}
+        
+        <div class="form-group">
+            {{ form_label(form.Name, 'Customer Name') }}
+            {{ form_widget(form.Name, { 'attr': {'placeholder': 'Enter customer name'} }) }}
+		{{ form_errors(form.Name) }}
+	</div>
+
+        <div class="form-group">
+            {{ form_label(form.Email, 'Email Address') }}
+            {{ form_widget(form.Email, { 'attr': {'placeholder': 'Enter email address', 'type': 'email'} }) }}
+        {{ form_errors(form.Email) }}
+    </div>
+
+        <div class="form-group">
+            {{ form_label(form.Phone, 'Phone Number') }}
+            {{ form_widget(form.Phone, { 'attr': {'placeholder': 'Enter phone number', 'type': 'tel'} }) }}
+        {{ form_errors(form.Phone) }}
+    </div>
+   
+        <div class="form-group">
+            {{ form_label(form.createAt, 'Date & Time') }}
+            {{ form_widget(form.createAt, { 'attr': {'placeholder': 'Select date and time'} }) }}
+		{{ form_errors(form.createAt) }}
+    </div>
+    
+        <div class="form-actions">
+            <button type="submit" class="btn">Create Customer</button>
+            <a href="{{ path('app_customer_index') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

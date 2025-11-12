@@ -1,41 +1,230 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Product index{% endblock %}
+{% block title %}Product Index{% endblock %}
 
 {% block body %}
-    <h1>Product index</h1>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Price</th>
-                <th>Image</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for product in products %}
-            <tr>
-                <td>{{ product.id }}</td>
-                <td>{{ product.name }}</td>
-                <td>{{ product.description }}</td>
-                <td>{{ product.price }}</td>
-                <td>{{ product.image }}</td>
-                <td>
-                    <a href="{{ path('app_product_show', {'id': product.id}) }}">show</a>
-                    <a href="{{ path('app_product_edit', {'id': product.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="6">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    main {
+        padding: 30px 20px;
+        background: linear-gradient(135deg, #ffb347, #ff6b35); /* gradient orange background */
+        min-height: 100vh;
+    }
 
-    <a href="{{ path('app_product_new') }}">Create new</a>
+    h2 {
+        background: linear-gradient(90deg, #ffcc70, #ff6b35);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: #efe6e6;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 1.9rem;
+        letter-spacing: 0.5px;
+    }
+
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .product-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 3px 12px rgba(255, 107, 53, 0.25);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 18px rgba(255, 107, 53, 0.35);
+    }
+
+    .product-image {
+        width: 100%;
+      
+        object-fit: cover;
+        background: #fff0e6;
+    }
+
+    .product-info {
+        padding: 16px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2d2d2d;
+        margin-bottom: 6px;
+    }
+
+    .product-category {
+        font-size: 0.85rem;
+        background: linear-gradient(90deg, #ffcc70, #ff8c42);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 10px;
+        text-transform: capitalize;
+        font-weight: 500;
+    }
+
+    .product-description {
+        font-size: 0.85rem;
+        color: #555;
+        margin-bottom: 12px;
+        line-height: 1.4;
+        flex-grow: 1;
+    }
+
+    .product-price {
+        font-size: 1.3rem;
+        font-weight: 700;
+        background: linear-gradient(90deg, #ff8c42, #ff6b35);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 12px;
+    }
+
+    .product-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 9px 16px;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: white;
+    }
+
+    .btn-view {
+        background: linear-gradient(135deg, #ffb347, #ff8c42);
+    }
+
+    .btn-view:hover {
+        background: linear-gradient(135deg, #ff9933, #ff6b35);
+        transform: translateY(-2px);
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, #ff8c42, #ff6b35);
+    }
+
+    .btn-edit:hover {
+        background: linear-gradient(135deg, #ff7a2f, #ff5520);
+        transform: translateY(-2px);
+    }
+
+    .create-button-container {
+        text-align: center;
+        margin-top: 40px;
+    }
+
+    .create-button {
+        display: inline-block;
+        padding: 14px 36px;
+        background: linear-gradient(135deg, #ffcc70, #ff6b35);
+        color: white;
+        text-decoration: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+    }
+
+    .create-button:hover {
+        background: linear-gradient(135deg, #ffb347, #ff5520);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4);
+    }
+
+    .no-products {
+        text-align: center;
+        padding: 40px 20px;
+        color: #fff;
+        font-weight: 500;
+        background: rgba(255, 107, 53, 0.2);
+        border-radius: 10px;
+        max-width: 600px;
+        margin: 40px auto;
+    }
+
+    @media (max-width: 768px) {
+        .products-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        h2 {
+            font-size: 1.6rem;
+        }
+
+        .product-image {
+            height: 150px;
+        }
+    }
+</style>
+
+<main>
+    <h2>Our Products</h2>
+
+    {% if products|length > 0 %}
+        <div class="products-grid">
+            {% for product in products %}
+                <div class="product-card">
+                    {% if product.image %}
+                        <img src="{{ asset('uploads/images/' ~ product.image) }}" alt="{{ product.name }}" class="product-image">
+                    {% else %}
+                        <div class="product-image" style="display: flex; align-items: center; justify-content: center; color: #ffb399; font-size: 0.85rem;">
+                            No Image Available
+                        </div>
+                    {% endif %}
+
+                    <div class="product-info">
+                        <h3 class="product-name">{{ product.name }}</h3>
+                        <p class="product-category">{{ product.category.name }}</p>
+                        <p class="product-description">
+                            {{ product.description|length > 80 ? product.description|slice(0, 80) ~ '...' : product.description }}
+                        </p>
+                        <div class="product-price">₱{{ product.price }}</div>
+                        <div class="product-actions">
+                            <a href="{{ path('app_product_show', {'id': product.id}) }}" class="btn btn-view">View</a>
+                            <a href="{{ path('app_product_edit', {'id': product.id}) }}" class="btn btn-edit">Edit</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-products">
+            <p>No products available yet.</p>
+        </div>
+    {% endif %}
+
+    <div class="create-button-container">
+        <a href="{{ path('app_product_new') }}" class="create-button">+ Create New Product</a>
+    </div>
+</main>
 {% endblock %}

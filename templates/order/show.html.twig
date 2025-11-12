@@ -1,0 +1,338 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Order #{{ order.id }}{% endblock %}
+
+{% block body %}
+{% block header_search %}{% endblock %}
+<style>
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #FFA500, #FF7F50, #FF6347);
+        color: #2c3e50;
+        margin: 0;
+        padding: 0;
+        line-height: 1.6;
+        min-height: 100vh;
+    }
+
+    .top-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .search-bar {
+        flex: 1;
+        max-width: 400px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        border: none;
+        border-radius: 25px;
+        background: white;
+        font-size: 0.9rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        font-size: 1rem;
+    }
+
+    .nav-icons {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .nav-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        position: relative;
+        cursor: pointer;
+    }
+
+    .notification-dot {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 8px;
+        height: 8px;
+        background: #dc3545;
+        border-radius: 50%;
+    }
+
+    .profile-pic {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #FF7F50, #FFA500);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        font-weight: 300;
+        color: white;
+        margin: 0;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .order-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .order-header {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .order-id {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .order-name {
+        font-size: 1.1rem;
+        color: #6c757d;
+        margin: 0.5rem 0 0 0;
+    }
+
+    .order-details {
+        padding: 1.5rem;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid #f1f3f4;
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        font-weight: 500;
+        color: #495057;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .detail-value {
+        color: #2c3e50;
+        font-weight: 500;
+    }
+
+    .status {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-completed {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-cancelled {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .total {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .actions {
+        display: flex;
+        gap: 1rem;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, #FF7F50, #FFA500);
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(255, 127, 80, 0.3);
+    }
+
+    .btn:hover {
+        background: linear-gradient(135deg, #FF6347, #FF8C00);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(255, 127, 80, 0.4);
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #FF8C00, #FFA500);
+        box-shadow: 0 2px 4px rgba(255, 140, 0, 0.3);
+    }
+
+    .btn-secondary:hover {
+        background: linear-gradient(135deg, #FF7F00, #FF8C00);
+        box-shadow: 0 4px 8px rgba(255, 140, 0, 0.4);
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #FF4500, #FF6347);
+        box-shadow: 0 2px 4px rgba(255, 69, 0, 0.3);
+    }
+
+    .btn-danger:hover {
+        background: linear-gradient(135deg, #FF2500, #FF4500);
+        box-shadow: 0 4px 8px rgba(255, 69, 0, 0.4);
+    }
+
+    @media (max-width: 768px) {
+        .top-nav {
+            padding: 1rem;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .search-bar {
+            max-width: 100%;
+        }
+        
+        .container {
+            margin: 1rem auto;
+            padding: 0 1rem;
+        }
+        
+        .page-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
+        }
+        
+        .detail-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+        
+        .actions {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="container">
+    <div class="page-header">
+        <h1>Order Details</h1>
+        <a href="{{ path('app_order_index') }}" class="btn btn-secondary">← Back to Orders</a>
+    </div>
+
+    <div class="order-card">
+        <div class="order-header">
+            <h2 class="order-id">Order #{{ order.id }}</h2>
+            <p class="order-name">{{ order.Name }}</p>
+        </div>
+
+        <div class="order-details">
+            <div class="detail-row">
+                <span class="detail-label">Order ID</span>
+                <span class="detail-value">#{{ order.id }}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Name</span>
+                <span class="detail-value">{{ order.Name }}</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Customer</span>
+                <span class="detail-value">{{ order.Customer ? order.Customer.Name : '-' }}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Created At</span>
+                <span class="detail-value">{{ order.createAt ? order.createAt|date('M d, Y \a\t g:i A') : 'Not set' }}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Status</span>
+                <span class="status status-{{ order.Status|lower }}">{{ order.Status }}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Total</span>
+                <span class="detail-value total">${{ order.Total }}</span>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="{{ path('app_order_edit', {'id': order.id}) }}" class="btn">Edit Order</a>
+    {{ include('order/_delete_form.html.twig') }}
+        </div>
+    </div>
+</div>
+{% endblock %}

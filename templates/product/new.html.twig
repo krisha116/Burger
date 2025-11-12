@@ -3,9 +3,181 @@
 {% block title %}New Product{% endblock %}
 
 {% block body %}
-    <h1>Create new Product</h1>
+<style>
+/* === Compact Minimalist Orange-Themed Form === */
 
-    {{ include('product/_form.html.twig') }}
+body {
+    background: linear-gradient(135deg, #ffb347, #ff7b00); /* soft orange gradient */
+    font-family: 'Poppins', sans-serif;
+}
 
-    <a href="{{ path('app_product_index') }}">back to list</a>
+.form-container {
+    width: 75%;
+    max-width: 800px; /* narrower width */
+    margin: 50px auto;
+    background-color: #fff;
+    padding: 30px 40px; /* smaller padding for compact look */
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.form-container:hover {
+    box-shadow: 0 6px 18px rgba(255, 123, 0, 0.15);
+}
+
+h1 {
+    text-align: center;
+    color: #ff7b00;
+    font-weight: 600;
+    margin-bottom: 25px; /* tighter space below title */
+    font-size: 1.7rem;
+}
+
+/* Compact 2-column grid */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 18px 20px; /* less gap between fields */
+}
+
+.fs-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.fs-label {
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: #444;
+    font-size: 0.9rem;
+}
+
+.fs-input, .fs-textarea, select {
+    width: 100%;
+    padding: 10px 12px; /* smaller input height */
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.fs-input:focus, .fs-textarea:focus, select:focus {
+    border-color: #ff7b00;
+    box-shadow: 0 0 5px rgba(255, 123, 0, 0.3);
+    outline: none;
+}
+
+.fs-textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+/* Make description and image fields span full width */
+.full-width {
+    grid-column: 1 / -1;
+}
+
+.fs-button-group {
+    text-align: center;
+    margin-top: 25px; /* smaller margin */
+}
+
+.fs-button {
+    background: linear-gradient(90deg, #ff9a3d, #ff7b00);
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 22px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.fs-button:hover {
+    background: linear-gradient(90deg, #ffb066, #ff944d);
+    box-shadow: 0 4px 10px rgba(255, 123, 0, 0.25);
+    transform: translateY(-2px);
+}
+
+.back-link {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    color: #ff7b00;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.back-link:hover {
+    color: #ff944d;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .form-container {
+        width: 90%;
+        padding: 25px;
+    }
+
+    h1 {
+        font-size: 1.4rem;
+    }
+}
+</style>
+
+<div class="form-container">
+    <h1>Create New Product</h1>
+
+    {{ form_start(form, { 'attr': { 'class': 'fs-form', 'novalidate': 'novalidate' } }) }}
+
+    <div class="form-grid">
+        <div class="fs-field">
+            {{ form_label(form.name, 'Name', { 'label_attr': {'class': 'fs-label'} }) }}
+            {{ form_widget(form.name, { 'attr': {'class': 'fs-input', 'placeholder': 'Product Name'} }) }}
+            {{ form_errors(form.name) }}
+        </div>
+
+        <div class="fs-field">
+            {{ form_label(form.price, 'Price', { 'label_attr': {'class': 'fs-label'} }) }}
+            {{ form_widget(form.price, { 'attr': {'class': 'fs-input', 'placeholder': '0.00'} }) }}
+            {{ form_errors(form.price) }}
+        </div>
+
+        <div class="fs-field">
+            {{ form_label(form.category, 'Category', { 'label_attr': {'class': 'fs-label'} }) }}
+            {{ form_widget(form.category, { 'attr': {'class': 'fs-input'} }) }}
+            {{ form_errors(form.category) }}
+        </div>
+
+        <div class="fs-field">
+            {{ form_label(form.datetime, 'Date & Time', { 'label_attr': {'class': 'fs-label'} }) }}
+            {{ form_widget(form.datetime, { 'attr': {'class': 'fs-input', 'placeholder': 'YYYY-MM-DD HH:MM:SS'} }) }}
+            {{ form_errors(form.datetime) }}
+        </div>
+
+        <div class="fs-field full-width">
+            {{ form_label(form.description, 'Description', { 'label_attr': {'class': 'fs-label'} }) }}
+            {{ form_widget(form.description, { 'attr': {'class': 'fs-textarea', 'placeholder': 'Enter product description'} }) }}
+            {{ form_errors(form.description) }}
+        </div>
+
+        <div class="fs-field full-width">
+            {{ form_label(form.image, 'Product Image', { 'label_attr': {'class': 'fs-label'} }) }}
+            {{ form_widget(form.image, { 'attr': {'class': 'fs-input'} }) }}
+            {{ form_errors(form.image) }}
+        </div>
+    </div>
+
+    <div class="fs-button-group">
+        <button class="fs-button" type="submit">Create Product</button>
+    </div>
+
+    {{ form_end(form) }}
+
+    <a href="{{ path('app_product_index') }}" class="back-link">← Back to Product List</a>
+</div>
+
 {% endblock %}

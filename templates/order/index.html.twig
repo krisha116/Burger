@@ -1,0 +1,250 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Orders{% endblock %}
+
+{% block body %}
+{% block header_search %}{% endblock %}
+<style>
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #FFA500, #FF7F50, #FF6347);
+        color: #2c3e50;
+        margin: 0;
+        padding: 0;
+        line-height: 1.6;
+        min-height: 100vh;
+    }
+
+    .container {
+        padding: 0 1rem;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between; /* title left, button right */
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        font-weight: 300;
+        color: #ffff;
+        margin: 0;
+        text-align: left;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, #FF7F50, #FFA500);
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(255, 127, 80, 0.3);
+    }
+
+    .btn:hover {
+        background: linear-gradient(135deg, #FF6347, #FF8C00);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(255, 127, 80, 0.4);
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #FF8C00, #FFA500);
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+        box-shadow: 0 2px 4px rgba(255, 140, 0, 0.3);
+    }
+
+    .btn-secondary:hover {
+        background: linear-gradient(135deg, #FF7F00, #FF8C00);
+        box-shadow: 0 4px 8px rgba(255, 140, 0, 0.4);
+    }
+
+    .btn-danger {
+        background: #dc3545;
+    }
+
+    .btn-danger:hover {
+        background: #c82333;
+    }
+
+    .table-container {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        background: #f8f9fa;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 1px solid #dee2e6;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    td {
+        padding: 1rem;
+        border-bottom: 1px solid #f1f3f4;
+        color: #495057;
+    }
+
+    tr:hover {
+        background: #f8f9fa;
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    .actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .status {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-completed {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-cancelled {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .no-records {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+        font-style: italic;
+    }
+
+    .total {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            margin: 1rem auto;
+            padding: 0 0.5rem;
+        }
+        
+        .header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
+        }
+        
+        table {
+            font-size: 0.9rem;
+        }
+        
+        th, td {
+            padding: 0.75rem 0.5rem;
+        }
+        
+        .actions {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="container">
+    <div class="header">
+        <h1>Orders</h1>
+        <a href="{{ path('app_order_new') }}" class="btn">+ Add Order</a>
+    </div>
+    <div class="table-container">
+        <table id="ordersIndexTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Customer</th>
+                    <th>Products</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Total</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for order in orders %}
+                <tr>
+                    <td>#{{ order.id }}</td>
+                    <td>{{ order.Name }}</td>
+                    <td>{{ order.Customer ? order.Customer.Name : '-' }}</td>
+                    <td>
+                        {% if order.products|length > 0 %}
+                            {% for p in order.products %}{% if not loop.first %}, {% endif %}{{ p.Name }}{% endfor %}
+                        {% else %}-{% endif %}
+                    </td>
+                    <td>{{ order.createAt ? order.createAt|date('M d, Y') : '-' }}</td>
+                    <td>
+                        <span class="status status-{{ order.Status|lower }}">
+                            {{ order.Status }}
+                        </span>
+                    </td>
+                    <td class="total">${{ order.Total }}</td>
+                    <td class="actions">
+                        <a href="{{ path('app_order_show', {'id': order.id}) }}" class="btn btn-secondary">View</a>
+                        <a href="{{ path('app_order_edit', {'id': order.id}) }}" class="btn btn-secondary">Edit</a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="8" class="no-records">No orders found</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        if (window.DataTable) {
+          new DataTable('#ordersIndexTable', {
+            responsive: true,
+            searching: true,
+            lengthChange: true,
+            order: [],
+          });
+        }
+      });
+    </script>
+</div>
+{% endblock %}
