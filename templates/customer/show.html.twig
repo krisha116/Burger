@@ -295,8 +295,10 @@
         </div>
 
         <div class="actions">
+            {% if is_granted('ROLE_ADMIN') or (app.user and customer.createdBy and customer.createdBy.id == app.user.id) %}
             <a href="{{ path('app_customer_edit', {'id': customer.id}) }}" class="btn">Edit Customer</a>
             {{ include('customer/_delete_form.html.twig') }}
+            {% endif %}
         </div>
     </div>
 </div>

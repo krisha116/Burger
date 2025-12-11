@@ -9,16 +9,35 @@ use Symfony\Component\HttpFoundation\Request;
 use App\Repository\CustomerRepository;
 use App\Repository\ProductRepository;
 use App\Repository\OrderRepository;
+use App\Repository\UserRepository;
+use App\Repository\ActivityLogRepository;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+
 
 final class DashboardController extends AbstractController
 {
     #[Route('/dashboard', name: 'app_dashboard')]
-    public function index(Request $request, CustomerRepository $customerRepository, ProductRepository $productRepository, OrderRepository $orderRepository): Response
+    #[IsGranted('ROLE_ADMIN')]
+    public function index(Request $request, CustomerRepository $customerRepository, ProductRepository $productRepository, OrderRepository $orderRepository, UserRepository $userRepository, ActivityLogRepository $activityLogRepository): Response
     {
         $customerCount = $customerRepository->count([]);
         $productCount = $productRepository->count([]);
         $orderCount = $orderRepository->count([]);
         $totalSales = $orderRepository->getTotalSales();
+        
+        // Admin-specific statistics
+        $totalUsers = $userRepository->count([]);
+        $totalStaff = $userRepository->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.roles LIKE :role')
+            ->setParameter('role', '%ROLE_STAFF%')
+            ->getQuery()
+            ->getSingleScalarResult();
+        
+        $totalRecords = $customerCount + $productCount + $orderCount;
+        
+        // Recent activities (last 10)
+        $recentActivities = $activityLogRepository->findWithFilters(null, null, null, null, 10, 0);
 
         $q = trim((string) $request->query->get('q', ''));
         $sort = (string) $request->query->get('sort', 'date');
@@ -74,6 +93,11 @@ final class DashboardController extends AbstractController
             'perPage' => $perPage,
             'totalOrders' => $totalOrders,
             'totalPages' => $totalPages,
+            // Admin statistics
+            'totalUsers' => $totalUsers,
+            'totalStaff' => $totalStaff,
+            'totalRecords' => $totalRecords,
+            'recentActivities' => $recentActivities,
         ]);
     }
 }

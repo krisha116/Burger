@@ -1,0 +1,86 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Activity Log Details{% endblock %}
+
+{% block body %}
+<main class="h-full overflow-y-auto">
+    <div class="container px-6 mx-auto grid">
+        <div class="flex justify-between items-center my-6">
+            <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">Activity Log Details</h2>
+            <a href="{{ path('admin_activity_log_index') }}" class="px-4 py-2 text-sm font-medium leading-5 text-gray-700 transition-colors duration-150 bg-gray-100 border border-transparent rounded-lg hover:bg-gray-200">
+                Back to List
+            </a>
+        </div>
+
+        <div class="px-4 py-3 mb-8 bg-white rounded-lg shadow-md dark:bg-gray-800">
+            <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">ID</dt>
+                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-200">{{ log.id }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Timestamp</dt>
+                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-200">{{ log.createdAt|date('Y-m-d H:i:s') }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">User</dt>
+                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-200">{{ log.username ?? log.user.username }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">User Role</dt>
+                    <dd class="mt-1 text-sm">
+                        {% set roleVal = log.role ?? (log.user.roles|first) %}
+                        {% if roleVal == 'ROLE_ADMIN' %}
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">Admin</span>
+                        {% elseif roleVal == 'ROLE_STAFF' %}
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Staff</span>
+                        {% else %}
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">User</span>
+                        {% endif %}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Action</dt>
+                    <dd class="mt-1 text-sm">
+                        {% if log.action == 'CREATE' %}
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">CREATE</span>
+                        {% elseif log.action == 'UPDATE' %}
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">UPDATE</span>
+                        {% elseif log.action == 'DELETE' %}
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">DELETE</span>
+                        {% elseif log.action == 'LOGIN' %}
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-teal-100 text-teal-800">LOGIN</span>
+                        {% elseif log.action == 'LOGOUT' %}
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">LOGOUT</span>
+                        {% else %}
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">{{ log.action }}</span>
+                        {% endif %}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Entity Type</dt>
+                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-200">{{ log.entityType|default('-') }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Entity ID</dt>
+                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-200">{{ log.entityId|default('-') }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Description</dt>
+                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-200">{{ log.description|default('-') }}</dd>
+                </div>
+            </dl>
+
+            {% if log.affectedData %}
+            <div class="mt-6">
+                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Affected Data</dt>
+                <dd class="mt-1">
+                    <pre class="p-4 bg-gray-100 dark:bg-gray-900 rounded-lg text-xs overflow-x-auto">{{ log.affectedData }}</pre>
+                </dd>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</main>
+{% endblock %}
+

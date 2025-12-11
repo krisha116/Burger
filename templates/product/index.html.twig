@@ -190,6 +190,30 @@
 <main>
     <h2>Our Products</h2>
 
+    <!-- Search and Filter Form -->
+    <div style="max-width: 1200px; margin: 0 auto 30px; padding: 0 20px;">
+        <form method="get" style="display: flex; flex-wrap: wrap; gap: 15px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 3px 12px rgba(255, 107, 53, 0.25);">
+            <input type="text" name="search" value="{{ search }}" placeholder="Search products..." style="flex: 1; min-width: 200px; padding: 10px; border: 2px solid #ffb347; border-radius: 8px; font-size: 0.9rem;">
+            <select name="category" style="padding: 10px; border: 2px solid #ffb347; border-radius: 8px; font-size: 0.9rem; min-width: 150px;">
+                <option value="">All Categories</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {{ categoryId == category.id ? 'selected' : '' }}>{{ category.name }}</option>
+                {% endfor %}
+            </select>
+            <select name="sort" style="padding: 10px; border: 2px solid #ffb347; border-radius: 8px; font-size: 0.9rem; min-width: 120px;">
+                <option value="name" {{ sort == 'name' ? 'selected' : '' }}>Name</option>
+                <option value="price" {{ sort == 'price' ? 'selected' : '' }}>Price</option>
+                <option value="date" {{ sort == 'date' ? 'selected' : '' }}>Date</option>
+            </select>
+            <select name="dir" style="padding: 10px; border: 2px solid #ffb347; border-radius: 8px; font-size: 0.9rem; min-width: 100px;">
+                <option value="asc" {{ dir == 'asc' ? 'selected' : '' }}>Ascending</option>
+                <option value="desc" {{ dir == 'desc' ? 'selected' : '' }}>Descending</option>
+            </select>
+            <button type="submit" style="padding: 10px 20px; background: linear-gradient(135deg, #ff7f50, #ffa500); color: white; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: transform 0.2s;">Filter</button>
+            <a href="{{ path('app_product_index') }}" style="padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 8px; font-size: 0.9rem; font-weight: 600; display: inline-flex; align-items: center;">Clear</a>
+        </form>
+    </div>
+
     {% if products|length > 0 %}
         <div class="products-grid">
             {% for product in products %}
@@ -211,7 +235,9 @@
                         <div class="product-price">₱{{ product.price }}</div>
                         <div class="product-actions">
                             <a href="{{ path('app_product_show', {'id': product.id}) }}" class="btn btn-view">View</a>
+                            {% if is_granted('ROLE_ADMIN') or (app.user and product.createdBy and product.createdBy.id == app.user.id) %}
                             <a href="{{ path('app_product_edit', {'id': product.id}) }}" class="btn btn-edit">Edit</a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

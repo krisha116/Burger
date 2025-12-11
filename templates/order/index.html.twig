@@ -189,6 +189,33 @@
         <h1>Orders</h1>
         <a href="{{ path('app_order_new') }}" class="btn">+ Add Order</a>
     </div>
+    
+    <!-- Search and Filter Form -->
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
+        <form method="get" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
+            <input type="text" name="search" value="{{ search }}" placeholder="Search by order name or customer..." style="flex: 1; min-width: 250px; padding: 10px; border: 2px solid #FFA500; border-radius: 4px; font-size: 0.9rem;">
+            <select name="status" style="padding: 10px; border: 2px solid #FFA500; border-radius: 4px; font-size: 0.9rem; min-width: 150px;">
+                <option value="">All Status</option>
+                <option value="Pending" {{ statusFilter == 'Pending' ? 'selected' : '' }}>Pending</option>
+                <option value="Processing" {{ statusFilter == 'Processing' ? 'selected' : '' }}>Processing</option>
+                <option value="Completed" {{ statusFilter == 'Completed' ? 'selected' : '' }}>Completed</option>
+                <option value="Cancelled" {{ statusFilter == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
+            </select>
+            <select name="sort" style="padding: 10px; border: 2px solid #FFA500; border-radius: 4px; font-size: 0.9rem; min-width: 120px;">
+                <option value="date" {{ sort == 'date' ? 'selected' : '' }}>Date</option>
+                <option value="name" {{ sort == 'name' ? 'selected' : '' }}>Name</option>
+                <option value="total" {{ sort == 'total' ? 'selected' : '' }}>Total</option>
+                <option value="status" {{ sort == 'status' ? 'selected' : '' }}>Status</option>
+            </select>
+            <select name="dir" style="padding: 10px; border: 2px solid #FFA500; border-radius: 4px; font-size: 0.9rem; min-width: 100px;">
+                <option value="desc" {{ dir == 'desc' ? 'selected' : '' }}>Descending</option>
+                <option value="asc" {{ dir == 'asc' ? 'selected' : '' }}>Ascending</option>
+            </select>
+            <button type="submit" style="padding: 10px 20px; background: linear-gradient(135deg, #FF7F50, #FFA500); color: white; border: none; border-radius: 4px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">Filter</button>
+            <a href="{{ path('app_order_index') }}" style="padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9rem; font-weight: 600; display: inline-flex; align-items: center;">Clear</a>
+        </form>
+    </div>
+    
     <div class="table-container">
         <table id="ordersIndexTable">
             <thead>
@@ -223,7 +250,9 @@
                     <td class="total">${{ order.Total }}</td>
                     <td class="actions">
                         <a href="{{ path('app_order_show', {'id': order.id}) }}" class="btn btn-secondary">View</a>
+                        {% if is_granted('ROLE_ADMIN') or (app.user and order.createdBy and order.createdBy.id == app.user.id) %}
                         <a href="{{ path('app_order_edit', {'id': order.id}) }}" class="btn btn-secondary">Edit</a>
+                        {% endif %}
                     </td>
                 </tr>
             {% else %}

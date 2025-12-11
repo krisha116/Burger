@@ -5,20 +5,57 @@ namespace App\Controller;
 use App\Entity\Customer;
 use App\Form\CustomerType;
 use App\Repository\CustomerRepository;
+use App\Service\ActivityLogService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 #[Route('/customer')]
 final class CustomerController extends AbstractController
 {
+    public function __construct(
+        private ActivityLogService $activityLogService
+    ) {
+    }
+
     #[Route(name: 'app_customer_index', methods: ['GET'])]
-    public function index(CustomerRepository $customerRepository): Response
+    public function index(Request $request, CustomerRepository $customerRepository): Response
     {
+        $search = trim((string) $request->query->get('search', ''));
+        $sort = (string) $request->query->get('sort', 'name');
+        $dir = strtolower((string) $request->query->get('dir', 'asc')) === 'desc' ? 'DESC' : 'ASC';
+
+        $qb = $customerRepository->createQueryBuilder('c')
+            ->leftJoin('c.createdBy', 'u')->addSelect('u');
+
+        if ($search !== '') {
+            $qb->andWhere('LOWER(c.Name) LIKE :search OR LOWER(c.Email) LIKE :search OR LOWER(c.Phone) LIKE :search')
+               ->setParameter('search', '%' . strtolower($search) . '%');
+        }
+
+        switch ($sort) {
+            case 'email':
+                $qb->orderBy('c.Email', $dir);
+                break;
+            case 'date':
+                $qb->orderBy('c.createAt', $dir);
+                break;
+            case 'name':
+            default:
+                $qb->orderBy('c.Name', $dir);
+                break;
+        }
+
+        $customers = $qb->getQuery()->getResult();
+
         return $this->render('customer/index.html.twig', [
-            'customers' => $customerRepository->findAll(),
+            'customers' => $customers,
+            'search' => $search,
+            'sort' => $sort,
+            'dir' => strtolower($dir),
         ]);
     }
 
@@ -30,8 +67,26 @@ final class CustomerController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $customer->setCreateAt(new \DateTimeImmutable());
+            $user = $this->getUser();
+            if ($user instanceof \App\Entity\User) {
+                $customer->setCreatedBy($user);
+            }
+
             $entityManager->persist($customer);
             $entityManager->flush();
+
+            if ($user instanceof \App\Entity\User) {
+                $this->activityLogService->logCreate(
+                    $user,
+                    'Customer',
+                    $customer->getId(),
+                    ['name' => $customer->getName(), 'email' => $customer->getEmail()],
+                    sprintf('Created customer: %s', $customer->getName())
+                );
+            }
+            
+            $this->addFlash('success', 'Customer created successfully.');
 
             return $this->redirectToRoute('app_customer_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -53,11 +108,26 @@ final class CustomerController extends AbstractController
     #[Route('/{id}/edit', name: 'app_customer_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Customer $customer, EntityManagerInterface $entityManager): Response
     {
+        $this->denyUnlessOwnerOrAdmin($customer);
+
         $form = $this->createForm(CustomerType::class, $customer);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
+
+            $user = $this->getUser();
+            if ($user instanceof \App\Entity\User) {
+                $this->activityLogService->logUpdate(
+                    $user,
+                    'Customer',
+                    $customer->getId(),
+                    ['name' => $customer->getName(), 'email' => $customer->getEmail()],
+                    sprintf('Updated customer: %s', $customer->getName())
+                );
+            }
+            
+            $this->addFlash('success', 'Customer updated successfully.');
 
             return $this->redirectToRoute('app_customer_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -71,11 +141,44 @@ final class CustomerController extends AbstractController
     #[Route('/{id}', name: 'app_customer_delete', methods: ['POST'])]
     public function delete(Request $request, Customer $customer, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$customer->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$customer->getId(), $request->request->getString('_token'))) {
+            $this->denyUnlessOwnerOrAdmin($customer);
+
+            $customerName = $customer->getName();
+            $customerEmail = $customer->getEmail();
+            $customerId = $customer->getId();
+            
             $entityManager->remove($customer);
             $entityManager->flush();
+
+            $user = $this->getUser();
+            if ($user instanceof \App\Entity\User) {
+                $this->activityLogService->logDelete(
+                    $user,
+                    'Customer',
+                    $customerId,
+                    ['name' => $customerName, 'email' => $customerEmail],
+                    sprintf('Deleted customer: %s', $customerName)
+                );
+            }
+            
+            $this->addFlash('success', 'Customer deleted successfully.');
         }
 
         return $this->redirectToRoute('app_customer_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    private function denyUnlessOwnerOrAdmin(Customer $customer): void
+    {
+        $user = $this->getUser();
+        if ($user instanceof \App\Entity\User && in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+            return;
+        }
+
+        if ($user instanceof \App\Entity\User && $customer->getCreatedBy()?->getId() === $user->getId()) {
+            return;
+        }
+
+        throw new AccessDeniedException('You cannot modify this record.');
     }
 }

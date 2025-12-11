@@ -149,6 +149,25 @@
         <h1>Customers</h1>
         <a href="{{ path('app_customer_new') }}" class="btn">+ Add Customer</a>
     </div>
+    
+    <!-- Search and Filter Form -->
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
+        <form method="get" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
+            <input type="text" name="search" value="{{ search }}" placeholder="Search by name, email, or phone..." style="flex: 1; min-width: 250px; padding: 10px; border: 2px solid #FFA500; border-radius: 4px; font-size: 0.9rem;">
+            <select name="sort" style="padding: 10px; border: 2px solid #FFA500; border-radius: 4px; font-size: 0.9rem; min-width: 120px;">
+                <option value="name" {{ sort == 'name' ? 'selected' : '' }}>Name</option>
+                <option value="email" {{ sort == 'email' ? 'selected' : '' }}>Email</option>
+                <option value="date" {{ sort == 'date' ? 'selected' : '' }}>Date</option>
+            </select>
+            <select name="dir" style="padding: 10px; border: 2px solid #FFA500; border-radius: 4px; font-size: 0.9rem; min-width: 100px;">
+                <option value="asc" {{ dir == 'asc' ? 'selected' : '' }}>Ascending</option>
+                <option value="desc" {{ dir == 'desc' ? 'selected' : '' }}>Descending</option>
+            </select>
+            <button type="submit" style="padding: 10px 20px; background: linear-gradient(135deg, #FF7F50, #FFA500); color: white; border: none; border-radius: 4px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">Filter</button>
+            <a href="{{ path('app_customer_index') }}" style="padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9rem; font-weight: 600; display: inline-flex; align-items: center;">Clear</a>
+        </form>
+    </div>
+    
     <div class="table-container">
         <table id="customersIndexTable">
             <thead>
@@ -171,7 +190,9 @@
                     <td>{{ customer.createAt ? customer.createAt|date('M d, Y') : '-' }}</td>
                     <td class="actions">
                         <a href="{{ path('app_customer_show', {'id': customer.id}) }}" class="btn btn-secondary">View</a>
+                        {% if is_granted('ROLE_ADMIN') or (app.user and customer.createdBy and customer.createdBy.id == app.user.id) %}
                         <a href="{{ path('app_customer_edit', {'id': customer.id}) }}" class="btn btn-secondary">Edit</a>
+                        {% endif %}
                     </td>
                 </tr>
             {% else %}

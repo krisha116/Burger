@@ -189,8 +189,10 @@
 
     <div class="action-buttons">
         <a href="{{ path('app_product_index') }}" class="btn btn-back">Back</a>
+        {% if is_granted('ROLE_ADMIN') or (app.user and product.createdBy and product.createdBy.id == app.user.id) %}
         <a href="{{ path('app_product_edit', {'id': product.id}) }}" class="btn btn-edit">Edit</a>
         {{ include('product/_delete_form.html.twig') }}
+        {% endif %}
     </div>
 </div>
 {% endblock %}
