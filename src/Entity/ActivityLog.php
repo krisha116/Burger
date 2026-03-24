@@ -7,8 +7,32 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
 use Doctrine\ORM\Mapping\PrePersist;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Delete;
+use Symfony\Component\Serializer\Annotation\Groups;
+
 
 #[ORM\Entity(repositoryClass: ActivityLogRepository::class)]
+
+#[ApiResource(
+    operations: [
+        new Get(),
+        new GetCollection(),
+        new Post(),
+        new Get(),
+        new Put(),
+        new Delete()
+    ],
+
+normalizationContext: ['groups' => ['ActivityLog:read']],
+    denormalizationContext: ['groups' => ['ActivityLog:write']]
+
+)]
+#[ORM\ManyToOne(targetEntity: User::class)]
 #[ORM\Table(name: 'activity_logs')]
 #[ORM\HasLifecycleCallbacks]
 #[ORM\Index(columns: ['user_id'], name: 'idx_user_id')]
@@ -19,34 +43,45 @@ class ActivityLog
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['ActivityLog:read'])]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(nullable: false)]
+
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    #[Groups(['ActivityLog:read', 'ActivityLog:write'])]
     private ?User $user = null;
 
     #[ORM\Column(length: 180)]
+    #[Groups(['ActivityLog:read', 'ActivityLog:write'])]
     private ?string $username = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['ActivityLog:read', 'ActivityLog:write'])]
     private ?string $role = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['ActivityLog:read', 'ActivityLog:write'])]
     private ?string $action = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['ActivityLog:read', 'ActivityLog:write'])]
     private ?string $entityType = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['ActivityLog:read', 'ActivityLog:write'])]
     private ?int $entityId = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['ActivityLog:read', 'ActivityLog:write'])]
+
     private ?string $affectedData = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['ActivityLog:read', 'ActivityLog:write'])]
     private ?string $description = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['ActivityLog:read', 'ActivityLog:write'])]
     private ?\DateTimeInterface $createdAt = null;
 
     public function getId(): ?int

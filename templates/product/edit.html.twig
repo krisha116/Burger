@@ -115,6 +115,23 @@
         border-color: #cfcfcf;
     }
 
+    .header-actions {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-delete {
+        background: #dc3545;
+        color: #fff;
+        border-color: #dc3545;
+    }
+
+    .btn-delete:hover {
+        background: #c82333;
+        border-color: #c82333;
+    }
+
     .delete-section {
         background: #fff;
         border-radius: 8px;
@@ -219,7 +236,10 @@
 <div class="container">
     <div class="page-header">
         <h1>Edit Product</h1>
-        <a href="{{ path('app_product_index') }}" class="btn btn-secondary">← Back to Products</a>
+        <div class="header-actions">
+            <a href="{{ path('app_product_index') }}" class="btn btn-secondary">← Back to Products</a>
+            {{ include('product/_delete_form.html.twig') }}
+        </div>
     </div>
 
     <div class="product-card">
@@ -233,10 +253,5 @@
         </div>
     </div>
 
-    <div class="delete-section">
-        <h3>Delete Product</h3>
-        <p>Once deleted, this product cannot be recovered.</p>
-        {{ include('product/_delete_form.html.twig') }}
-    </div>
 </div>
 {% endblock %}

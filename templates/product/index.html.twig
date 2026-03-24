@@ -1,256 +1,81 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Product Index{% endblock %}
+{% block title %}Products{% endblock %}
 
 {% block body %}
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
+<main class="pp-page">
+  <div class="pp-page__inner">
+    <header class="pp-toolbar pp-toolbar--actions-only">
+      <h1 class="pp-sr-only">Products</h1>
+      <div class="pp-toolbar__actions">
+        <a href="{{ path('app_product_new') }}" class="pp-create-btn">
+          <span aria-hidden="true">+</span> New product
+        </a>
+      </div>
+    </header>
 
-    main {
-        padding: 30px 20px;
-        background: linear-gradient(135deg, #ffb347, #ff6b35); /* gradient orange background */
-        min-height: 100vh;
-    }
-
-    h2 {
-        background: linear-gradient(90deg, #ffcc70, #ff6b35);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: #efe6e6;
-        font-weight: 700;
-        text-align: center;
-        margin-bottom: 30px;
-        font-size: 1.9rem;
-        letter-spacing: 0.5px;
-    }
-
-    .products-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-        gap: 20px;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 20px;
-    }
-
-    .product-card {
-        background: white;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 3px 12px rgba(255, 107, 53, 0.25);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .product-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 6px 18px rgba(255, 107, 53, 0.35);
-    }
-
-    .product-image {
-        width: 100%;
-      
-        object-fit: cover;
-        background: #fff0e6;
-    }
-
-    .product-info {
-        padding: 16px;
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .product-name {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #2d2d2d;
-        margin-bottom: 6px;
-    }
-
-    .product-category {
-        font-size: 0.85rem;
-        background: linear-gradient(90deg, #ffcc70, #ff8c42);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 10px;
-        text-transform: capitalize;
-        font-weight: 500;
-    }
-
-    .product-description {
-        font-size: 0.85rem;
-        color: #555;
-        margin-bottom: 12px;
-        line-height: 1.4;
-        flex-grow: 1;
-    }
-
-    .product-price {
-        font-size: 1.3rem;
-        font-weight: 700;
-        background: linear-gradient(90deg, #ff8c42, #ff6b35);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 12px;
-    }
-
-    .product-actions {
-        display: flex;
-        gap: 8px;
-    }
-
-    .btn {
-        flex: 1;
-        padding: 9px 16px;
-        border: none;
-        border-radius: 6px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        text-decoration: none;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        color: white;
-    }
-
-    .btn-view {
-        background: linear-gradient(135deg, #ffb347, #ff8c42);
-    }
-
-    .btn-view:hover {
-        background: linear-gradient(135deg, #ff9933, #ff6b35);
-        transform: translateY(-2px);
-    }
-
-    .btn-edit {
-        background: linear-gradient(135deg, #ff8c42, #ff6b35);
-    }
-
-    .btn-edit:hover {
-        background: linear-gradient(135deg, #ff7a2f, #ff5520);
-        transform: translateY(-2px);
-    }
-
-    .create-button-container {
-        text-align: center;
-        margin-top: 40px;
-    }
-
-    .create-button {
-        display: inline-block;
-        padding: 14px 36px;
-        background: linear-gradient(135deg, #ffcc70, #ff6b35);
-        color: white;
-        text-decoration: none;
-        border-radius: 10px;
-        font-weight: 600;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
-    }
-
-    .create-button:hover {
-        background: linear-gradient(135deg, #ffb347, #ff5520);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4);
-    }
-
-    .no-products {
-        text-align: center;
-        padding: 40px 20px;
-        color: #fff;
-        font-weight: 500;
-        background: rgba(255, 107, 53, 0.2);
-        border-radius: 10px;
-        max-width: 600px;
-        margin: 40px auto;
-    }
-
-    @media (max-width: 768px) {
-        .products-grid {
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 16px;
-        }
-
-        h2 {
-            font-size: 1.6rem;
-        }
-
-        .product-image {
-            height: 150px;
-        }
-    }
-</style>
-
-<main>
-    <h2>Our Products</h2>
-
-    <!-- Search and Filter Form -->
-    <div style="max-width: 1200px; margin: 0 auto 30px; padding: 0 20px;">
-        <form method="get" style="display: flex; flex-wrap: wrap; gap: 15px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 3px 12px rgba(255, 107, 53, 0.25);">
-            <input type="text" name="search" value="{{ search }}" placeholder="Search products..." style="flex: 1; min-width: 200px; padding: 10px; border: 2px solid #ffb347; border-radius: 8px; font-size: 0.9rem;">
-            <select name="category" style="padding: 10px; border: 2px solid #ffb347; border-radius: 8px; font-size: 0.9rem; min-width: 150px;">
-                <option value="">All Categories</option>
-                {% for category in categories %}
-                    <option value="{{ category.id }}" {{ categoryId == category.id ? 'selected' : '' }}>{{ category.name }}</option>
-                {% endfor %}
-            </select>
-            <select name="sort" style="padding: 10px; border: 2px solid #ffb347; border-radius: 8px; font-size: 0.9rem; min-width: 120px;">
-                <option value="name" {{ sort == 'name' ? 'selected' : '' }}>Name</option>
-                <option value="price" {{ sort == 'price' ? 'selected' : '' }}>Price</option>
-                <option value="date" {{ sort == 'date' ? 'selected' : '' }}>Date</option>
-            </select>
-            <select name="dir" style="padding: 10px; border: 2px solid #ffb347; border-radius: 8px; font-size: 0.9rem; min-width: 100px;">
-                <option value="asc" {{ dir == 'asc' ? 'selected' : '' }}>Ascending</option>
-                <option value="desc" {{ dir == 'desc' ? 'selected' : '' }}>Descending</option>
-            </select>
-            <button type="submit" style="padding: 10px 20px; background: linear-gradient(135deg, #ff7f50, #ffa500); color: white; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: transform 0.2s;">Filter</button>
-            <a href="{{ path('app_product_index') }}" style="padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 8px; font-size: 0.9rem; font-weight: 600; display: inline-flex; align-items: center;">Clear</a>
-        </form>
-    </div>
-
-    {% if products|length > 0 %}
-        <div class="products-grid">
-            {% for product in products %}
-                <div class="product-card">
-                    {% if product.image %}
-                        <img src="{{ asset('uploads/images/' ~ product.image) }}" alt="{{ product.name }}" class="product-image">
-                    {% else %}
-                        <div class="product-image" style="display: flex; align-items: center; justify-content: center; color: #ffb399; font-size: 0.85rem;">
-                            No Image Available
-                        </div>
-                    {% endif %}
-
-                    <div class="product-info">
-                        <h3 class="product-name">{{ product.name }}</h3>
-                        <p class="product-category">{{ product.category.name }}</p>
-                        <p class="product-description">
-                            {{ product.description|length > 80 ? product.description|slice(0, 80) ~ '...' : product.description }}
-                        </p>
-                        <div class="product-price">₱{{ product.price }}</div>
-                        <div class="product-actions">
-                            <a href="{{ path('app_product_show', {'id': product.id}) }}" class="btn btn-view">View</a>
-                            {% if is_granted('ROLE_ADMIN') or (app.user and product.createdBy and product.createdBy.id == app.user.id) %}
-                            <a href="{{ path('app_product_edit', {'id': product.id}) }}" class="btn btn-edit">Edit</a>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
+    <div class="pp-filters">
+      <form method="get" class="pp-filters__form" aria-label="Filter products">
+        <div class="pp-field">
+          <label for="pp-filter-category">Category</label>
+          <select id="pp-filter-category" name="category" class="pp-select">
+            <option value="" {{ categoryId == 0 ? 'selected' : '' }}>All categories</option>
+            {% for category in categories %}
+              <option value="{{ category.id }}" {{ categoryId == category.id ? 'selected' : '' }}>{{ category.name }}</option>
             {% endfor %}
+          </select>
         </div>
-    {% else %}
-        <div class="no-products">
-            <p>No products available yet.</p>
+        <div class="pp-filter-actions">
+          <button type="submit" class="pp-btn-filter">Apply filters</button>
+          <a href="{{ path('app_product_index') }}" class="pp-btn-clear">Reset</a>
         </div>
-    {% endif %}
-
-    <div class="create-button-container">
-        <a href="{{ path('app_product_new') }}" class="create-button">+ Create New Product</a>
+      </form>
     </div>
+
+    <div class="pp-scroll">
+      {% if products|length > 0 %}
+        <div class="pp-grid">
+          {% for product in products %}
+            <article class="pp-card">
+              <div class="pp-card__media">
+                {% if product.image %}
+                  <img src="{{ asset('uploads/images/' ~ product.image) }}" alt="{{ product.name|e('html_attr') }}" loading="lazy">
+                {% else %}
+                  <div class="pp-card__placeholder" role="img" aria-label="No image">No image</div>
+                {% endif %}
+              </div>
+              <div class="pp-card__body">
+                <h2 class="pp-card__title">{{ product.name }}</h2>
+                {% if product.category %}
+                  <span class="pp-card__badge">{{ product.category.name }}</span>
+                {% else %}
+                  <span class="pp-card__badge pp-card__badge--muted">Uncategorized</span>
+                {% endif %}
+                <p class="pp-card__desc">
+                  {% if product.description %}
+                    {{ product.description }}
+                  {% else %}
+                    <span class="pp-desc-muted">No description yet.</span>
+                  {% endif %}
+                </p>
+                <p class="pp-card__price">₱{{ product.price }}</p>
+                <div class="pp-card__actions">
+                  <a href="{{ path('app_product_show', {id: product.id}) }}" class="pp-btn-view">View</a>
+                  {% if is_granted('ROLE_ADMIN') or (app.user and product.createdBy and product.createdBy.id == app.user.id) %}
+                    <a href="{{ path('app_product_edit', {id: product.id}) }}" class="pp-btn-edit">Edit</a>
+                  {% endif %}
+                </div>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="pp-empty">
+          <strong>No products yet</strong>
+          Create your first product to see it here.
+        </div>
+      {% endif %}
+    </div>
+  </div>
 </main>
 {% endblock %}

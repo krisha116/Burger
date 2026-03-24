@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Order;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -25,6 +26,32 @@ class OrderRepository extends ServiceEntityRepository
         $result = $qb->getQuery()->getSingleScalarResult();
 
         return (float) $result;
+    }
+
+    /**
+     * @return Order[]
+     */
+    public function findPlacedByUser(User $user): array
+    {
+        return $this->createQueryBuilder('o')
+            ->andWhere('o.createdBy = :user')
+            ->setParameter('user', $user)
+            ->orderBy('o.createAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findOneWithDetails(int $id): ?Order
+    {
+        return $this->createQueryBuilder('o')
+            ->leftJoin('o.Customer', 'cust')->addSelect('cust')
+            ->leftJoin('o.products', 'p')->addSelect('p')
+            ->leftJoin('p.Category', 'pc')->addSelect('pc')
+            ->leftJoin('o.createdBy', 'u')->addSelect('u')
+            ->andWhere('o.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
     //    /**

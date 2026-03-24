@@ -1,86 +1,91 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Activity Log Details{% endblock %}
+{% block title %}Activity log #{{ log.id }}{% endblock %}
 
 {% block body %}
-<main class="h-full overflow-y-auto">
-    <div class="container px-6 mx-auto grid">
-        <div class="flex justify-between items-center my-6">
-            <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">Activity Log Details</h2>
-            <a href="{{ path('admin_activity_log_index') }}" class="px-4 py-2 text-sm font-medium leading-5 text-gray-700 transition-colors duration-150 bg-gray-100 border border-transparent rounded-lg hover:bg-gray-200">
-                Back to List
-            </a>
+<main class="ald-page">
+    <div class="ald-shell">
+        <div class="ald-toolbar">
+            <a href="{{ path('admin_activity_log_index') }}" class="ald-back">← Back to logs</a>
         </div>
 
-        <div class="px-4 py-3 mb-8 bg-white rounded-lg shadow-md dark:bg-gray-800">
-            <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <article class="ald-card">
+            <h1 class="pp-sr-only">Activity log #{{ log.id }}</h1>
+
+            {% set roleVal = log.role %}
+            {% if not roleVal and log.user %}
+                {% set roleVal = log.user.roles|first %}
+            {% endif %}
+
+            <dl class="ald-dl">
                 <div>
-                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">ID</dt>
-                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-200">{{ log.id }}</dd>
+                    <dt>Timestamp</dt>
+                    <dd>
+                        {% if log.createdAt %}
+                            <time datetime="{{ log.createdAt|date('c') }}">{{ log.createdAt|date('M j, Y') }}</time>
+                            <p class="us-meta-note">{{ log.createdAt|date('H:i:s') }}</p>
+                        {% else %}
+                            —
+                        {% endif %}
+                    </dd>
                 </div>
                 <div>
-                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Timestamp</dt>
-                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-200">{{ log.createdAt|date('Y-m-d H:i:s') }}</dd>
+                    <dt>User</dt>
+                    <dd>{{ log.username ?? (log.user ? log.user.username : '—') }}</dd>
                 </div>
                 <div>
-                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">User</dt>
-                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-200">{{ log.username ?? log.user.username }}</dd>
-                </div>
-                <div>
-                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">User Role</dt>
-                    <dd class="mt-1 text-sm">
-                        {% set roleVal = log.role ?? (log.user.roles|first) %}
+                    <dt>Role</dt>
+                    <dd>
                         {% if roleVal == 'ROLE_ADMIN' %}
-                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">Admin</span>
+                            <span class="um-badge um-badge--admin">Admin</span>
                         {% elseif roleVal == 'ROLE_STAFF' %}
-                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Staff</span>
+                            <span class="um-badge um-badge--staff">Staff</span>
                         {% else %}
-                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">User</span>
+                            <span class="um-badge um-badge--user">User</span>
                         {% endif %}
                     </dd>
                 </div>
                 <div>
-                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Action</dt>
-                    <dd class="mt-1 text-sm">
+                    <dt>Action</dt>
+                    <dd>
                         {% if log.action == 'CREATE' %}
-                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">CREATE</span>
+                            <span class="al-act-badge al-act-badge--create">Create</span>
                         {% elseif log.action == 'UPDATE' %}
-                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">UPDATE</span>
+                            <span class="al-act-badge al-act-badge--update">Update</span>
                         {% elseif log.action == 'DELETE' %}
-                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">DELETE</span>
+                            <span class="al-act-badge al-act-badge--delete">Delete</span>
                         {% elseif log.action == 'LOGIN' %}
-                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-teal-100 text-teal-800">LOGIN</span>
+                            <span class="al-act-badge al-act-badge--login">Login</span>
                         {% elseif log.action == 'LOGOUT' %}
-                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">LOGOUT</span>
+                            <span class="al-act-badge al-act-badge--logout">Logout</span>
+                        {% elseif log.action in ['PASSWORD_CHANGE', 'PASSWORD_RESET'] %}
+                            <span class="al-act-badge al-act-badge--password">{{ log.action|replace({'_': ' '}) }}</span>
                         {% else %}
-                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">{{ log.action }}</span>
+                            <span class="al-act-badge al-act-badge--default">{{ log.action }}</span>
                         {% endif %}
                     </dd>
                 </div>
                 <div>
-                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Entity Type</dt>
-                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-200">{{ log.entityType|default('-') }}</dd>
+                    <dt>Entity type</dt>
+                    <dd>{{ log.entityType|default('—') }}</dd>
                 </div>
                 <div>
-                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Entity ID</dt>
-                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-200">{{ log.entityId|default('-') }}</dd>
+                    <dt>Entity ID</dt>
+                    <dd>{{ log.entityId is not null ? log.entityId : '—' }}</dd>
                 </div>
-                <div>
-                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Description</dt>
-                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-200">{{ log.description|default('-') }}</dd>
+                <div class="ald-dl__full">
+                    <dt>Description</dt>
+                    <dd>{{ log.description|default('—') }}</dd>
                 </div>
             </dl>
 
             {% if log.affectedData %}
-            <div class="mt-6">
-                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Affected Data</dt>
-                <dd class="mt-1">
-                    <pre class="p-4 bg-gray-100 dark:bg-gray-900 rounded-lg text-xs overflow-x-auto">{{ log.affectedData }}</pre>
-                </dd>
-            </div>
+                <div class="ald-pre-wrap">
+                    <p class="ald-pre-label">Affected data</p>
+                    <pre class="ald-pre" tabindex="0">{{ log.affectedData }}</pre>
+                </div>
             {% endif %}
-        </div>
+        </article>
     </div>
 </main>
 {% endblock %}
-

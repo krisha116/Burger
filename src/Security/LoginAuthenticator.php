@@ -61,13 +61,12 @@ class LoginAuthenticator extends AbstractLoginFormAuthenticator
             if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
                 return new RedirectResponse($this->urlGenerator->generate('app_dashboard'));
             } elseif (in_array('ROLE_STAFF', $user->getRoles(), true)) {
-                // Staff can go to products page or their first accessible page
-                return new RedirectResponse($this->urlGenerator->generate('app_product_index'));
+                return new RedirectResponse($this->urlGenerator->generate('app_dashboard'));
             }
         }
 
-        // Default fallback
-        return new RedirectResponse($this->urlGenerator->generate('app_product_index'));
+        // Default fallback for ROLE_USER - storefront landing
+        return new RedirectResponse($this->urlGenerator->generate('app_home'));
     }
 
     protected function getLoginUrl(Request $request): string

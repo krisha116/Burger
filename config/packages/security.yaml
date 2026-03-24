@@ -14,13 +14,21 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+
+
+        api_platform:
+            pattern: ^/api
+            stateless: true
+            provider: app_user_provider
+        
         main:
             lazy: true
             provider: app_user_provider
             custom_authenticator: App\Security\LoginAuthenticator
+            user_checker: App\Security\UserChecker
             logout:
                 path: app_logout
-                target: app_login
+                target: app_home
            
 
 
@@ -35,13 +43,19 @@ security:
     access_control:
         # Admin-only routes
         - { path: ^/admin, roles: ["ROLE_ADMIN"] }
-        - { path: ^/dashboard, roles: ["ROLE_ADMIN"] }
+        - { path: ^/dashboard, roles: ["ROLE_STAFF", "ROLE_ADMIN"] }
         # Staff routes
         - { path: ^/category, roles: ["ROLE_STAFF", "ROLE_ADMIN"] }
         - { path: ^/product, roles: ["ROLE_STAFF", "ROLE_ADMIN"] }
         - { path: ^/order, roles: ["ROLE_STAFF", "ROLE_ADMIN"] }
-        - { path: ^/customer, roles: ["ROLE_STAFF", "ROLE_ADMIN"] }
+        # Only protect the customer management area (not the public customer landing page)
+        - { path: ^/customer($|/), roles: ["ROLE_STAFF", "ROLE_ADMIN"] }
         - { path: ^/profile, roles: ["ROLE_USER"] }
+        # Customer order history (storefront)
+        - { path: ^/my-orders, roles: ["ROLE_USER", "ROLE_STAFF", "ROLE_ADMIN"] }
+        # Public shop at /, /customer-landing, /menu, /about; login only for checkout & receipt
+        - { path: ^/customer-landing/checkout, roles: ["ROLE_USER", "ROLE_STAFF", "ROLE_ADMIN"] }
+        - { path: ^/customer-landing/receipt, roles: ["ROLE_USER", "ROLE_STAFF", "ROLE_ADMIN"] }
         
 
 when@test:

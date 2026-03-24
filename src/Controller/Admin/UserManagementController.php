@@ -39,9 +39,14 @@ class UserManagementController extends AbstractController
                ->setParameter('search', '%' . $search . '%');
         }
 
-        if ($roleFilter) {
+        if ($roleFilter === 'ROLE_USER') {
+            // "User" = no Admin/Staff in stored roles (matches directory badge, includes [] or ROLE_USER-only)
+            $qb->andWhere('u.roles NOT LIKE :rAdmin AND u.roles NOT LIKE :rStaff')
+                ->setParameter('rAdmin', '%ROLE_ADMIN%')
+                ->setParameter('rStaff', '%ROLE_STAFF%');
+        } elseif ($roleFilter) {
             $qb->andWhere('u.roles LIKE :role')
-               ->setParameter('role', '%' . $roleFilter . '%');
+                ->setParameter('role', '%' . $roleFilter . '%');
         }
 
         if ($statusFilter !== null && $statusFilter !== '') {
@@ -114,12 +119,11 @@ class UserManagementController extends AbstractController
     public function edit(Request $request, User $user): Response
     {
         $form = $this->createForm(UserType::class, $user, ['is_edit' => true]);
-        
-        // Pre-populate the roles field with current role
-        $currentRoles = $user->getRoles();
-        $currentRole = 'ROLE_STAFF'; // default
-        foreach ($currentRoles as $r) {
-            if ($r !== 'ROLE_USER') {
+
+        // Pre-populate role dropdown (read-only on edit): prefer Admin/Staff, else User
+        $currentRole = 'ROLE_USER';
+        foreach ($user->getRoles() as $r) {
+            if ($r === 'ROLE_ADMIN' || $r === 'ROLE_STAFF') {
                 $currentRole = $r;
                 break;
             }
@@ -136,15 +140,17 @@ class UserManagementController extends AbstractController
                 $user->setPassword($this->passwordHasher->hashPassword($user, $plainPassword));
             }
 
-            // Set role as array
-            $role = $form->get('roles')->getData();
-            if ($role && is_string($role)) {
-                $user->setRoles([$role]);
-            }
+            // Username, email, and role are disabled on edit — only isActive (and optional password) apply
 
             $this->entityManager->flush();
 
-            $roleString = is_string($role) ? $role : (is_array($role) ? ($role[0] ?? 'ROLE_USER') : 'ROLE_USER');
+            $roleString = 'ROLE_USER';
+            foreach ($user->getRoles() as $r) {
+                if ($r === 'ROLE_ADMIN' || $r === 'ROLE_STAFF') {
+                    $roleString = $r;
+                    break;
+                }
+            }
             $this->activityLogService->logUpdate(
                 $this->getUser(),
                 'User',

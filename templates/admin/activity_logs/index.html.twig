@@ -3,134 +3,149 @@
 {% block title %}Activity Logs{% endblock %}
 
 {% block body %}
-<main class="h-full overflow-y-auto">
-    <div class="container px-6 mx-auto grid">
-        <h2 class="my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200">Activity Logs</h2>
+<main class="al-page">
+    <div class="al-page__inner">
+        <h1 class="pp-sr-only">Activity logs</h1>
 
-        <!-- Filters -->
-        <div class="mb-6 bg-white rounded-lg shadow-xs dark:bg-gray-800 p-4">
-            <form method="get" class="flex flex-wrap gap-4">
-                <select name="user" class="form-select">
-                    <option value="">All Users</option>
-                    {% for user in users %}
-                        <option value="{{ user.id }}" {{ filters.user == user.id ? 'selected' : '' }}>{{ user.username }}</option>
-                    {% endfor %}
-                </select>
-                <select name="action" class="form-select">
-                    <option value="">All Actions</option>
-                    {% for action in actions %}
-                        <option value="{{ action }}" {{ filters.action == action ? 'selected' : '' }}>{{ action }}</option>
-                    {% endfor %}
-                </select>
-                <input type="date" name="start_date" value="{{ filters.start_date }}" class="form-input" placeholder="Start Date">
-                <input type="date" name="end_date" value="{{ filters.end_date }}" class="form-input" placeholder="End Date">
-                <button type="submit" class="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg hover:bg-purple-700">
-                    Filter
-                </button>
-                <a href="{{ path('admin_activity_log_index') }}" class="px-4 py-2 text-sm font-medium leading-5 text-gray-700 transition-colors duration-150 bg-gray-100 border border-transparent rounded-lg hover:bg-gray-200">
-                    Clear
-                </a>
+        <section class="al-filters" aria-label="Filter activity logs">
+            <form method="get" class="al-filters__form">
+                <div class="pp-field">
+                    <label for="al-filter-user">User</label>
+                    <select id="al-filter-user" name="user" class="pp-select">
+                        <option value="">All users</option>
+                        {% for u in users %}
+                            <option value="{{ u.id }}" {{ filters.user == u.id ? 'selected' : '' }}>{{ u.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="pp-field">
+                    <label for="al-filter-action">Action</label>
+                    <select id="al-filter-action" name="action" class="pp-select">
+                        <option value="">All actions</option>
+                        {% for act in actions %}
+                            <option value="{{ act }}" {{ filters.action == act ? 'selected' : '' }}>{{ act }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="pp-field al-date-field">
+                    <label for="al-filter-start">From</label>
+                    <input type="date" id="al-filter-start" name="start_date" value="{{ filters.start_date }}" class="al-date" autocomplete="off">
+                </div>
+                <div class="pp-field al-date-field">
+                    <label for="al-filter-end">To</label>
+                    <input type="date" id="al-filter-end" name="end_date" value="{{ filters.end_date }}" class="al-date" autocomplete="off">
+                </div>
+                <div class="al-filter-actions">
+                    <button type="submit" class="pp-btn-filter">Apply</button>
+                    <a href="{{ path('admin_activity_log_index') }}" class="pp-btn-clear">Reset</a>
+                </div>
             </form>
-        </div>
+        </section>
 
-        <!-- Logs Table -->
-        <div class="w-full overflow-hidden rounded-lg shadow-xs">
-            <div class="w-full overflow-x-auto">
-                <table class="w-full whitespace-no-wrap">
+        <section class="al-table-panel" aria-label="Activity log entries">
+            <header class="al-table-panel__head">
+                <h2>Audit trail</h2>
+            </header>
+            <div class="al-table-scroll">
+                <table class="al-table">
                     <thead>
-                        <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-800">
-                            <th class="px-4 py-3">Timestamp</th>
-                            <th class="px-4 py-3">User</th>
-                            <th class="px-4 py-3">Role</th>
-                            <th class="px-4 py-3">Action</th>
-                            <th class="px-4 py-3">Entity</th>
-                            <th class="px-4 py-3">Description</th>
-                            <th class="px-4 py-3">Actions</th>
+                        <tr>
+                            <th scope="col">Timestamp</th>
+                            <th scope="col">User</th>
+                            <th scope="col">Role</th>
+                            <th scope="col">Action</th>
+                            <th scope="col">Entity</th>
+                            <th scope="col">Description</th>
+                            <th scope="col">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
+                    <tbody>
                         {% for log in logs %}
-                        <tr class="text-gray-700 dark:text-gray-400">
-                            <td class="px-4 py-3 text-sm">{{ log.createdAt ? log.createdAt|date('Y-m-d H:i:s') : '-' }}</td>
-                            <td class="px-4 py-3 text-sm">{{ log.username ?? log.user.username }}</td>
-                            <td class="px-4 py-3 text-sm">
-                                {% set roleVal = log.role ?? (log.user.roles|first) %}
-                                {% if roleVal == 'ROLE_ADMIN' or ('ROLE_ADMIN' in log.user.roles|default([])) %}
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">Admin</span>
-                                {% elseif roleVal == 'ROLE_STAFF' or ('ROLE_STAFF' in log.user.roles|default([])) %}
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Staff</span>
-                                {% else %}
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">User</span>
-                                {% endif %}
-                            </td>
-                            <td class="px-4 py-3 text-sm">
-                                {% if log.action == 'CREATE' %}
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">CREATE</span>
-                                {% elseif log.action == 'UPDATE' %}
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">UPDATE</span>
-                                {% elseif log.action == 'DELETE' %}
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">DELETE</span>
-                                {% elseif log.action == 'LOGIN' %}
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-teal-100 text-teal-800">LOGIN</span>
-                                {% elseif log.action == 'LOGOUT' %}
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">LOGOUT</span>
-                                {% else %}
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">{{ log.action }}</span>
-                                {% endif %}
-                            </td>
-                            <td class="px-4 py-3 text-sm">
-                                {% if log.entityType %}
-                                    {{ log.entityType }}{% if log.entityId %} #{{ log.entityId }}{% endif %}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-                            <td class="px-4 py-3 text-sm">{{ log.description|default('-') }}</td>
-                            <td class="px-4 py-3 text-sm">
-                                <a href="{{ path('admin_activity_log_show', {id: log.id}) }}" class="text-purple-600 hover:text-purple-900">View</a>
-                            </td>
-                        </tr>
+                            {% set roleVal = log.role %}
+                            {% if not roleVal and log.user %}
+                                {% set roleVal = log.user.roles|first %}
+                            {% endif %}
+                            <tr>
+                                <td class="al-ts">{{ log.createdAt ? log.createdAt|date('Y-m-d H:i:s') : '—' }}</td>
+                                <td><span class="al-user">{{ log.username ?? (log.user ? log.user.username : '—') }}</span></td>
+                                <td>
+                                    {% if roleVal == 'ROLE_ADMIN' %}
+                                        <span class="um-badge um-badge--admin">Admin</span>
+                                    {% elseif roleVal == 'ROLE_STAFF' %}
+                                        <span class="um-badge um-badge--staff">Staff</span>
+                                    {% else %}
+                                        <span class="um-badge um-badge--user">User</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if log.action == 'CREATE' %}
+                                        <span class="al-act-badge al-act-badge--create">Create</span>
+                                    {% elseif log.action == 'UPDATE' %}
+                                        <span class="al-act-badge al-act-badge--update">Update</span>
+                                    {% elseif log.action == 'DELETE' %}
+                                        <span class="al-act-badge al-act-badge--delete">Delete</span>
+                                    {% elseif log.action == 'LOGIN' %}
+                                        <span class="al-act-badge al-act-badge--login">Login</span>
+                                    {% elseif log.action == 'LOGOUT' %}
+                                        <span class="al-act-badge al-act-badge--logout">Logout</span>
+                                    {% elseif log.action in ['PASSWORD_CHANGE', 'PASSWORD_RESET'] %}
+                                        <span class="al-act-badge al-act-badge--password">{{ log.action|replace({'_': ' '}) }}</span>
+                                    {% else %}
+                                        <span class="al-act-badge al-act-badge--default">{{ log.action }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="al-entity">
+                                    {% if log.entityType %}
+                                        {{ log.entityType }}{% if log.entityId %} #{{ log.entityId }}{% endif %}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td><span class="al-desc">{{ log.description|default('—') }}</span></td>
+                                <td>
+                                    <a href="{{ path('admin_activity_log_show', {id: log.id}) }}" class="um-act um-act--view">View</a>
+                                </td>
+                            </tr>
                         {% else %}
-                        <tr>
-                            <td colspan="7" class="px-4 py-3 text-center text-gray-500">No activity logs found.</td>
-                        </tr>
+                            <tr class="al-empty">
+                                <td colspan="7">No activity logs match your filters.</td>
+                            </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
-        </div>
 
-        <!-- Pagination -->
-        {% if totalPages > 1 %}
-        <div class="mt-6 flex justify-center">
-            <nav class="flex space-x-2">
-                {% if page > 1 %}
-                    <a href="{{ path('admin_activity_log_index', {page: page - 1}|merge(filters)) }}" class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                        Previous
-                    </a>
-                {% endif %}
-                {% for i in 1..totalPages %}
-                    {% if i == page %}
-                        <span class="px-3 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg">{{ i }}</span>
-                    {% else %}
-                        <a href="{{ path('admin_activity_log_index', {page: i}|merge(filters)) }}" class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                            {{ i }}
-                        </a>
-                    {% endif %}
-                {% endfor %}
-                {% if page < totalPages %}
-                    <a href="{{ path('admin_activity_log_index', {page: page + 1}|merge(filters)) }}" class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                        Next
-                    </a>
-                {% endif %}
-            </nav>
-        </div>
-        {% endif %}
+            {% if totalPages > 1 %}
+                <nav class="al-pagination" aria-label="Pagination">
+                    <ul class="dash-page-nav">
+                        {% if page > 1 %}
+                            <li><a href="{{ path('admin_activity_log_index', {page: page - 1}|merge(filters)) }}">Prev</a></li>
+                        {% else %}
+                            <li><span class="opacity-50" aria-disabled="true">Prev</span></li>
+                        {% endif %}
+                        {% for i in 1..totalPages %}
+                            {% if i == page %}
+                                <li><span class="dash-page-nav__current" aria-current="page">{{ i }}</span></li>
+                            {% else %}
+                                <li><a href="{{ path('admin_activity_log_index', {page: i}|merge(filters)) }}">{{ i }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        {% if page < totalPages %}
+                            <li><a href="{{ path('admin_activity_log_index', {page: page + 1}|merge(filters)) }}">Next</a></li>
+                        {% else %}
+                            <li><span class="opacity-50" aria-disabled="true">Next</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
 
-        <div class="mt-4 text-sm text-gray-600 dark:text-gray-400">
-            Showing {{ logs|length }} of {{ totalLogs }} logs
-        </div>
+            <footer class="al-footer">
+                <span>Showing {{ logs|length }} of {{ totalLogs }} entries</span>
+                {% if totalPages > 1 %}
+                    <span>Page {{ page }} / {{ totalPages }}</span>
+                {% endif %}
+            </footer>
+        </section>
     </div>
 </main>
 {% endblock %}
-

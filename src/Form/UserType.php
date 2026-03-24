@@ -25,21 +25,25 @@ class UserType extends AbstractType
             ->add('username', TextType::class, [
                 'label' => 'Username',
                 'required' => true,
+                'disabled' => $isEdit,
             ])
             ->add('email', EmailType::class, [
                 'label' => 'Email',
                 'required' => true,
+                'disabled' => $isEdit,
             ])
             ->add('roles', ChoiceType::class, [
                 'label' => 'Role',
                 'choices' => [
                     'Admin' => 'ROLE_ADMIN',
                     'Staff' => 'ROLE_STAFF',
+                    'User' => 'ROLE_USER',
                 ],
                 'multiple' => false,
                 'expanded' => false,
                 'required' => true,
                 'mapped' => false,
+                'disabled' => $isEdit,
             ])
             ->add('isActive', CheckboxType::class, [
                 'label' => 'Active',

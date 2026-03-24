@@ -31,6 +31,9 @@ class Order
     #[ORM\Column]
     private ?float $Total = null;
 
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $paymentMethod = null;
+
     /**
      * @var Collection<int, Product>
      */
@@ -99,6 +102,18 @@ class Order
     public function setTotal(float $Total): static
     {
         $this->Total = $Total;
+
+        return $this;
+    }
+
+    public function getPaymentMethod(): ?string
+    {
+        return $this->paymentMethod;
+    }
+
+    public function setPaymentMethod(?string $paymentMethod): static
+    {
+        $this->paymentMethod = $paymentMethod;
 
         return $this;
     }

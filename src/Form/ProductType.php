@@ -10,14 +10,43 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
-use Symfony\Component\Validator\Constraints\File as FileConstraint; // ✅ Add this line
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+// NOTE: Intentionally not using FileConstraint here because some environments
+// lack php_fileinfo and Symfony may still try to run the MIME guesser.
 
 class ProductType extends AbstractType
 {
+    /**
+     * Preset catalog titles (value = stored product name). Used for create/edit product pickers.
+     */
+    public const PRESET_NAME_CHOICES = [
+        'Classic Cheeseburger' => 'Classic Cheeseburger',
+        'Hamburger' => 'Hamburger',
+        'Double Cheeseburger' => 'Double Cheeseburger',
+        'Bacon Cheeseburger' => 'Bacon Cheeseburger',
+        'Crispy Chicken Burger' => 'Crispy Chicken Burger',
+        'Spicy Chicken Burger' => 'Spicy Chicken Burger',
+        'Chicken Fillet Burger' => 'Chicken Fillet Burger',
+        'Chicken BBQ Burger' => 'Chicken BBQ Burger',
+        'Mushroom Swiss Burger' => 'Mushroom Swiss Burger',
+        'French Fries' => 'French Fries',
+        'Curly Fries' => 'Curly Fries',
+        'Cheese Fries' => 'Cheese Fries',
+        'Choco Milk Tea' => 'Choco Milk Tea',
+        'Milk Tea' => 'Milk Tea',
+        'Iced Coffee' => 'Iced Coffee',
+        'Lemonade' => 'Lemonade',
+        'Soft Drink' => 'Soft Drink',
+    ];
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('name')
+            ->add('name', ChoiceType::class, [
+                'choices' => self::PRESET_NAME_CHOICES,
+                'placeholder' => 'Select a product name',
+                'attr' => ['data-product-name-select' => '1'],
+            ])
             ->add('description')
             ->add('price')
             ->add('category', EntityType::class, [
@@ -25,6 +54,7 @@ class ProductType extends AbstractType
                 'choice_label' => 'name',
                 'placeholder' => 'Select a Category',
                 'required' => false,
+                'attr' => ['data-product-category-select' => '1'],
             ])
             ->add('datetime', DateTimeType::class, [
                 'widget' => 'single_text',
@@ -36,16 +66,10 @@ class ProductType extends AbstractType
                 'label' => 'Upload Product Image',
                 'mapped' => false,
                 'required' => false,
-                'constraints' => [
-                    new FileConstraint([
-                        'maxSize' => '2M',
-                        'mimeTypes' => [
-                            'image/jpeg',
-                            'image/png',
-                        ],
-                        'mimeTypesMessage' => 'Please upload a valid image (JPEG or PNG).',
-                    ])
-                ],
+                // Do not use FileConstraint here.
+                // In some environments without php_fileinfo, Symfony may still call the MIME type guesser
+                // and throw: "Unable to guess the MIME type as no guessers are available".
+                // We'll validate extension/size in the controller instead.
             ]);
     }
 

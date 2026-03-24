@@ -1,288 +1,85 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Order{% endblock %}
+{% block title %}New order{% endblock %}
 
 {% block body %}
 {% block header_search %}{% endblock %}
-<style>
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background: linear-gradient(135deg, #FFA500, #FF7F50, #FF6347);
-        color: #07498bff;
-        margin: 0;
-        padding: 0;
-        line-height: 1.6;
-        min-height: 100vh;
-    }
 
-    .top-nav {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem 2rem;
-        margin-bottom: 2rem;
-    }
+<main class="ue-page">
+    <div class="ue-shell">
+        <a href="{{ path('app_order_index') }}" class="ue-back">← Back to orders</a>
 
-    .search-bar {
-        flex: 1;
-        max-width: 400px;
-        margin: 0 auto;
-        position: relative;
-    }
+        <div class="ue-card">
+            <header class="ue-card__head">
+                <p class="ue-card__eyebrow">Orders</p>
+                <h1 class="ue-card__title">Create order</h1>
+            </header>
+            <div class="ue-card__body">
+                {{ form_start(form, {attr: {novalidate: 'novalidate'}}) }}
 
-    .search-input {
-        width: 100%;
-        padding: 0.75rem 1rem 0.75rem 2.5rem;
-        border: none;
-        border-radius: 25px;
-        background: white;
-        font-size: 0.9rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
+                <div class="ue-grid ue-grid--stack">
+                    <div class="ue-field">
+                        {{ form_label(form.products, 'Product') }}
+                        {{ form_widget(form.products, {attr: {class: 'ue-select'}}) }}
+                        <div class="ue-errors">{{ form_errors(form.products) }}</div>
+                    </div>
+                </div>
 
-    .search-icon {
-        position: absolute;
-        left: 0.75rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #6c757d;
-        font-size: 1rem;
-    }
+                <div class="ue-grid ue-section--tight-top">
+                    <div class="ue-field">
+                        {{ form_label(form.Total, 'Total (₱)') }}
+                        {{ form_widget(form.Total, {attr: {class: 'ue-input', placeholder: '0.00', step: '0.01', inputmode: 'decimal', 'data-order-total-input': '1'}}) }}
+                        <div class="ue-errors">{{ form_errors(form.Total) }}</div>
+                    </div>
+                    <div class="ue-field">
+                        {{ form_label(form.Status, 'Status') }}
+                        {{ form_widget(form.Status, {attr: {class: 'ue-select'}}) }}
+                        <div class="ue-errors">{{ form_errors(form.Status) }}</div>
+                    </div>
+                    <div class="ue-field">
+                        {{ form_label(form.paymentMethod, 'Payment') }}
+                        {{ form_widget(form.paymentMethod, {attr: {class: 'ue-select'}}) }}
+                        <div class="ue-errors">{{ form_errors(form.paymentMethod) }}</div>
+                    </div>
+                </div>
 
-    .nav-icons {
-        display: flex;
-        gap: 1rem;
-        align-items: center;
-    }
+                <div class="ue-actions">
+                    <a href="{{ path('app_order_index') }}" class="ue-btn ue-btn--ghost">Cancel</a>
+                    <button type="submit" class="ue-btn ue-btn--primary">Create order</button>
+                </div>
 
-    .nav-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        position: relative;
-        cursor: pointer;
-    }
-
-    .notification-dot {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        width: 8px;
-        height: 8px;
-        background: #dc3545;
-        border-radius: 50%;
-    }
-
-    .profile-pic {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #FF7F50, #FFA500);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: 600;
-        font-size: 0.9rem;
-    }
-
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 2rem;
-    }
-
-    .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-    }
-
-    h1 {
-        font-size: 2.5rem;
-        font-weight: 300;
-        color: white;
-        margin: 0;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .form-container {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        padding: 2rem;
-        max-width: 600px;
-        margin: 0 auto;
-    }
-
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-
-    label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: 500;
-        color: #495057;
-        font-size: 0.9rem;
-    }
-
-    input, select, textarea {
-        width: 100%;
-        padding: 0.75rem;
-        border: 1px solid #ced4da;
-        border-radius: 4px;
-        font-size: 1rem;
-        transition: border-color 0.2s ease;
-        box-sizing: border-box;
-    }
-
-    input:focus, select:focus, textarea:focus {
-        outline: none;
-        border-color: #FF7F50;
-        box-shadow: 0 0 0 2px rgba(255, 127, 80, 0.2);
-    }
-
-    .form-actions {
-        display: flex;
-        gap: 1rem;
-        margin-top: 2rem;
-        padding-top: 1rem;
-        border-top: 1px solid #e9ecef;
-    }
-
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.75rem 1.5rem;
-        background: linear-gradient(135deg, #FF7F50, #FFA500);
-        color: white;
-        text-decoration: none;
-        border-radius: 4px;
-        font-size: 0.9rem;
-        font-weight: 500;
-        transition: all 0.2s ease;
-        border: none;
-        cursor: pointer;
-        box-shadow: 0 2px 4px rgba(255, 127, 80, 0.3);
-    }
-
-    .btn:hover {
-        background: linear-gradient(135deg, #FF6347, #FF8C00);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(255, 127, 80, 0.4);
-    }
-
-    .btn-secondary {
-        background: linear-gradient(135deg, #FF8C00, #FFA500);
-        box-shadow: 0 2px 4px rgba(255, 140, 0, 0.3);
-    }
-
-    .btn-secondary:hover {
-        background: linear-gradient(135deg, #FF7F00, #FF8C00);
-        box-shadow: 0 4px 8px rgba(255, 140, 0, 0.4);
-    }
-
-    .form-errors {
-        color: #dc3545;
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
-    }
-
-    @media (max-width: 768px) {
-        .top-nav {
-            padding: 1rem;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        
-        .search-bar {
-            max-width: 100%;
-        }
-        
-        .container {
-            margin: 1rem auto;
-            padding: 0 1rem;
-        }
-        
-        .page-header {
-            flex-direction: column;
-            gap: 1rem;
-            align-items: stretch;
-        }
-        
-        .form-container {
-            padding: 1.5rem;
-        }
-        
-        .form-actions {
-            flex-direction: column;
-        }
-    }
-</style>
-
-
-
-<div class="container">
-    <div class="page-header">
-        <h1>New Order</h1>
-        <a href="{{ path('app_order_index') }}" class="btn btn-secondary">← Back to Orders</a>
-    </div>
-
-    <div class="form-container">
-        {{ form_start(form) }}
-        
-        <div class="form-group">
-            {{ form_label(form.Name, 'Order Name') }}
-            {{ form_widget(form.Name, { 'attr': {'placeholder': 'Enter order name'} }) }}
-            {{ form_errors(form.Name) }}
-        </div>
-
-        <div class="form-group">
-            {{ form_label(form.createAt, 'Date & Time') }}
-            {{ form_widget(form.createAt, { 'attr': {'placeholder': 'Select date and time'} }) }}
-            {{ form_errors(form.createAt) }}
-        </div>
-
-        <div class="form-group">
-            {{ form_label(form.Total, 'Total Amount') }}
-            {{ form_widget(form.Total, { 'attr': {'placeholder': '0.00', 'step': '0.01'} }) }}
-            {{ form_errors(form.Total) }}
-        </div>
-
-        <div class="form-group">
-            {{ form_label(form.Status, 'Status') }}
-            {{ form_widget(form.Status) }}
-            {{ form_errors(form.Status) }}
-        </div>
-
-        <div class="form-group" style="display:flex; gap:1rem; align-items:flex-start;">
-            <div style="flex:1;">
-                {{ form_label(form.Customer, 'Customer') }}
-                {{ form_widget(form.Customer) }}
-                {{ form_errors(form.Customer) }}
-            </div>
-            <div style="flex:1;">
-                {{ form_label(form.products, 'Products') }}
-                {{ form_widget(form.products) }}
-                {{ form_errors(form.products) }}
+                {{ form_end(form) }}
             </div>
         </div>
-
-        <div class="form-actions">
-            <button type="submit" class="btn">Create Order</button>
-            <a href="{{ path('app_order_index') }}" class="btn btn-secondary">Cancel</a>
-        </div>
-        
-        {{ form_end(form) }}
     </div>
-</div>
+</main>
+
+<script type="application/json" id="order-product-prices">{{ productPriceMap|default({})|json_encode|raw }}</script>
+<script>
+(function () {
+    document.addEventListener('DOMContentLoaded', function () {
+        var dataEl = document.getElementById('order-product-prices');
+        var prices = {};
+        if (dataEl && dataEl.textContent) {
+            try { prices = JSON.parse(dataEl.textContent); } catch (e) { prices = {}; }
+        }
+        var sel = document.querySelector('[data-order-product-select="1"]');
+        var total = document.querySelector('[data-order-total-input="1"]');
+        if (!sel || !total) return;
+
+        function applyPrice() {
+            var id = sel.value;
+            if (!id || !Object.prototype.hasOwnProperty.call(prices, id)) return;
+            var p = prices[id];
+            if (p == null) return;
+            var n = Number(p);
+            if (!isNaN(n)) {
+                total.value = n.toFixed(2);
+            }
+        }
+
+        sel.addEventListener('change', applyPrice);
+    });
+})();
+</script>
 {% endblock %}

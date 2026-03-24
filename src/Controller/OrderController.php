@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Order;
 use App\Form\OrderType;
 use App\Repository\OrderRepository;
+use App\Repository\ProductRepository;
 use App\Service\ActivityLogService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -31,8 +32,11 @@ final class OrderController extends AbstractController
         $dir = strtolower((string) $request->query->get('dir', 'desc')) === 'asc' ? 'ASC' : 'DESC';
 
         $qb = $orderRepository->createQueryBuilder('o')
+            ->distinct()
             ->leftJoin('o.Customer', 'c')->addSelect('c')
-            ->leftJoin('o.createdBy', 'u')->addSelect('u');
+            ->leftJoin('o.createdBy', 'u')->addSelect('u')
+            ->leftJoin('o.products', 'op')->addSelect('op')
+            ->leftJoin('op.Category', 'opc')->addSelect('opc');
 
         if ($search !== '') {
             $qb->andWhere('LOWER(o.Name) LIKE :search OR LOWER(c.Name) LIKE :search')
@@ -72,14 +76,26 @@ final class OrderController extends AbstractController
     }
 
     #[Route('/new', name: 'app_order_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, ProductRepository $productRepository): Response
     {
         $order = new Order();
-        $form = $this->createForm(OrderType::class, $order);
+        $form = $this->createForm(OrderType::class, $order, ['quick_create' => true]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $order->setCreateAt(new \DateTimeImmutable());
+
+            $label = null;
+            foreach ($order->getProducts() as $p) {
+                $label = $p->getName();
+                break;
+            }
+            if ($label !== null && $label !== '') {
+                $order->setName($label);
+            } else {
+                $order->setName(sprintf('Order %s', (new \DateTimeImmutable())->format('YmdHis')));
+            }
+
             $user = $this->getUser();
             if ($user instanceof \App\Entity\User) {
                 $order->setCreatedBy($user);
@@ -103,15 +119,29 @@ final class OrderController extends AbstractController
             return $this->redirectToRoute('app_order_index', [], Response::HTTP_SEE_OTHER);
         }
 
+        $productPriceMap = [];
+        foreach ($productRepository->findBy([], ['Name' => 'ASC']) as $pr) {
+            $id = $pr->getId();
+            if ($id !== null) {
+                $productPriceMap[$id] = $pr->getPrice();
+            }
+        }
+
         return $this->render('order/new.html.twig', [
             'order' => $order,
             'form' => $form,
+            'productPriceMap' => $productPriceMap,
         ]);
     }
 
     #[Route('/{id}', name: 'app_order_show', methods: ['GET'])]
-    public function show(Order $order): Response
+    public function show(int $id, OrderRepository $orderRepository): Response
     {
+        $order = $orderRepository->findOneWithDetails($id);
+        if (!$order) {
+            throw $this->createNotFoundException('Order not found.');
+        }
+
         return $this->render('order/show.html.twig', [
             'order' => $order,
         ]);
@@ -121,6 +151,10 @@ final class OrderController extends AbstractController
     public function edit(Request $request, Order $order, EntityManagerInterface $entityManager): Response
     {
         $this->denyUnlessOwnerOrAdmin($order);
+
+        if ($order->getStatus() === 'Completed') {
+            throw new AccessDeniedException('Completed orders cannot be modified.');
+        }
 
         $form = $this->createForm(OrderType::class, $order);
         $form->handleRequest($request);
@@ -183,7 +217,7 @@ final class OrderController extends AbstractController
     private function denyUnlessOwnerOrAdmin(Order $order): void
     {
         $user = $this->getUser();
-        if ($user instanceof \App\Entity\User && in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+        if ($user instanceof \App\Entity\User && (in_array('ROLE_ADMIN', $user->getRoles(), true) || in_array('ROLE_STAFF', $user->getRoles(), true))) {
             return;
         }
 

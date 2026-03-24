@@ -1,55 +1,77 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit User{% endblock %}
+{% block title %}Edit user — {{ user.username }}{% endblock %}
 
 {% block body %}
-<main class="h-full overflow-y-auto">
-    <div class="container px-6 mx-auto grid">
-        <h2 class="my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200">Edit User: {{ user.username }}</h2>
+<main class="ue-page">
+  <div class="ue-shell">
+    <div class="ue-card">
+      <h1 class="pp-sr-only">Edit account — {{ user.username }}</h1>
+      <div class="ue-card__body">
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
 
-        <div class="px-4 py-3 mb-8 bg-white rounded-lg shadow-md dark:bg-gray-800">
-            {{ form_start(form) }}
-            <div class="grid gap-6 mb-8 md:grid-cols-2">
-                <div>
-                    {{ form_label(form.username, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'}}) }}
-                    {{ form_widget(form.username, {'attr': {'class': 'form-input w-full'}}) }}
-                    {{ form_errors(form.username) }}
-                </div>
-                <div>
-                    {{ form_label(form.email, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'}}) }}
-                    {{ form_widget(form.email, {'attr': {'class': 'form-input w-full'}}) }}
-                    {{ form_errors(form.email) }}
-                </div>
-                <div>
-                    {{ form_label(form.roles, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'}}) }}
-                    {{ form_widget(form.roles, {'attr': {'class': 'form-select w-full'}}) }}
-                    {{ form_errors(form.roles) }}
-                </div>
-                <div>
-                    {{ form_label(form.isActive, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'}}) }}
-                    {{ form_widget(form.isActive, {'attr': {'class': 'form-checkbox'}}) }}
-                    {{ form_errors(form.isActive) }}
-                </div>
-                {% if form.plainPassword is defined %}
-                <div>
-                    {{ form_label(form.plainPassword, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'}}) }}
-                    {{ form_widget(form.plainPassword, {'attr': {'class': 'form-input w-full', 'placeholder': 'Leave blank to keep current password'}}) }}
-                    {{ form_errors(form.plainPassword) }}
-                    <p class="mt-1 text-xs text-gray-500">Leave blank to keep current password</p>
-                </div>
-                {% endif %}
+        <section class="ue-section" aria-labelledby="ue-locked-heading">
+          <h2 id="ue-locked-heading" class="ue-section__label">Account details</h2>
+          <p class="ue-section__hint">Username, email, and role are managed separately and can’t be changed on this screen.</p>
+          <div class="ue-grid">
+            <div class="ue-field">
+              {{ form_label(form.username) }}
+              {{ form_widget(form.username, {'attr': {'class': 'ue-input ue-input--locked'}}) }}
+              <div class="ue-errors">{{ form_errors(form.username) }}</div>
+              <span class="ue-lock-tag" aria-hidden="true">Read only</span>
             </div>
-            <div class="flex justify-end space-x-4">
-                <a href="{{ path('admin_user_index') }}" class="px-4 py-2 text-sm font-medium leading-5 text-gray-700 transition-colors duration-150 bg-gray-100 border border-transparent rounded-lg hover:bg-gray-200">
-                    Cancel
-                </a>
-                <button type="submit" class="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple">
-                    Update User
-                </button>
+            <div class="ue-field">
+              {{ form_label(form.email) }}
+              {{ form_widget(form.email, {'attr': {'class': 'ue-input ue-input--locked'}}) }}
+              <div class="ue-errors">{{ form_errors(form.email) }}</div>
+              <span class="ue-lock-tag" aria-hidden="true">Read only</span>
             </div>
-            {{ form_end(form) }}
+            <div class="ue-field">
+              {{ form_label(form.roles) }}
+              {{ form_widget(form.roles, {'attr': {'class': 'ue-select ue-input--locked'}}) }}
+              <div class="ue-errors">{{ form_errors(form.roles) }}</div>
+              <span class="ue-lock-tag" aria-hidden="true">Read only</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="ue-section" aria-labelledby="ue-active-heading">
+          <div class="ue-panel-editable">
+            <h2 id="ue-active-heading" class="ue-section__label">Access</h2>
+            <p class="ue-section__hint" style="margin-bottom: 0.85rem;">This is the only setting you can change here.</p>
+            <div class="ue-check">
+              {{ form_widget(form.isActive) }}
+              <label for="{{ form.isActive.vars.id }}" class="ue-check__text">
+                <strong>Account active</strong>
+                <span>When turned off, this user cannot log in until re-enabled.</span>
+              </label>
+            </div>
+            {% if form_errors(form.isActive)|length > 0 %}
+              <div class="ue-errors">{{ form_errors(form.isActive) }}</div>
+            {% endif %}
+          </div>
+        </section>
+
+        {% if form.plainPassword is defined %}
+          <section class="ue-section" aria-labelledby="ue-pw-heading">
+            <h2 id="ue-pw-heading" class="ue-section__label">Password</h2>
+            <p class="ue-section__hint">Optional — use the dedicated reset flow for a guided password change.</p>
+            <div class="ue-field">
+              {{ form_label(form.plainPassword) }}
+              {{ form_widget(form.plainPassword, {'attr': {'class': 'ue-input', 'placeholder': 'Leave blank to keep current password', 'autocomplete': 'new-password'}}) }}
+              <div class="ue-errors">{{ form_errors(form.plainPassword) }}</div>
+            </div>
+          </section>
+        {% endif %}
+
+        <div class="ue-actions">
+          <a href="{{ path('admin_user_index') }}" class="ue-btn ue-btn--ghost">Cancel</a>
+          <button type="submit" class="ue-btn ue-btn--primary">Save changes</button>
         </div>
+
+        {{ form_end(form) }}
+      </div>
     </div>
+  </div>
 </main>
 {% endblock %}
-

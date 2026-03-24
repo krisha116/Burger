@@ -11,13 +11,14 @@ use App\Repository\ProductRepository;
 use App\Repository\OrderRepository;
 use App\Repository\UserRepository;
 use App\Repository\ActivityLogRepository;
+use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 
 final class DashboardController extends AbstractController
 {
     #[Route('/dashboard', name: 'app_dashboard')]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_STAFF")'))]
     public function index(Request $request, CustomerRepository $customerRepository, ProductRepository $productRepository, OrderRepository $orderRepository, UserRepository $userRepository, ActivityLogRepository $activityLogRepository): Response
     {
         $customerCount = $customerRepository->count([]);
@@ -61,6 +62,9 @@ final class DashboardController extends AbstractController
         switch ($sort) {
             case 'name':
                 $qb->orderBy('o.Name', $dir);
+                break;
+            case 'customer':
+                $qb->orderBy('c.Name', $dir);
                 break;
             case 'amount':
                 $qb->orderBy('o.Total', $dir);

@@ -1,323 +1,472 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Order{% endblock %}
+{% block title %}Edit order #{{ order.id }} — Grilled & Bites{% endblock %}
 
 {% block body %}
 {% block header_search %}{% endblock %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
 <style>
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background: linear-gradient(135deg, #FFA500, #FF7F50, #FF6347);
-        color: #2c3e50;
-        margin: 0;
-        padding: 0;
-        line-height: 1.6;
-        min-height: 100vh;
+  /*
+   * Dashboard shell: .main-content is flex + height:100vh + overflow:hidden (app.css).
+   * This <main> fills the area below the header and scrolls so short windows still reach Save / Delete.
+   */
+  @media (min-width: 768px) {
+    .main-content main.gb-order-edit-scroll-root {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
     }
+  }
 
-    .top-nav {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem 2rem;
-        margin-bottom: 2rem;
-    }
+  main.gb-order-edit-scroll-root {
+    display: block;
+    width: 100%;
+  }
 
-    .search-bar {
-        flex: 1;
-        max-width: 400px;
-        margin: 0 auto;
-        position: relative;
-    }
+  main.gb-order-edit-scroll-root::-webkit-scrollbar {
+    width: 10px;
+  }
 
-    .search-input {
-        width: 100%;
-        padding: 0.75rem 1rem 0.75rem 2.5rem;
-        border: none;
-        border-radius: 25px;
-        background: white;
-        font-size: 0.9rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
+  main.gb-order-edit-scroll-root::-webkit-scrollbar-thumb {
+    background: rgba(15, 23, 42, 0.2);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
 
-    .search-icon {
-        position: absolute;
-        left: 0.75rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #6c757d;
-        font-size: 1rem;
-    }
+  .gb-order-edit {
+    --oe-bg: #eef1f6;
+    --oe-surface: #ffffff;
+    --oe-ink: #0f172a;
+    --oe-muted: #64748b;
+    --oe-accent: #ea580c;
+    --oe-accent-soft: rgba(234, 88, 12, 0.1);
+    --oe-border: #e2e8f0;
+    --oe-radius: 16px;
+    --oe-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 28px rgba(15, 23, 42, 0.06);
+    --oe-font: 'Inter', system-ui, -apple-system, sans-serif;
+    min-height: min-content;
+    margin: 0;
+    padding: 0 0 2.5rem;
+    font-family: var(--oe-font);
+    color: var(--oe-ink);
+    background-color: var(--oe-bg);
+    background-image:
+      radial-gradient(ellipse 100% 70% at 100% 0%, rgba(251, 146, 60, 0.07), transparent 52%),
+      radial-gradient(ellipse 70% 50% at 0% 100%, rgba(14, 165, 233, 0.04), transparent 45%);
+    box-sizing: border-box;
+  }
 
-    .nav-icons {
-        display: flex;
-        gap: 1rem;
-        align-items: center;
-    }
+  .gb-order-edit *,
+  .gb-order-edit *::before,
+  .gb-order-edit *::after {
+    box-sizing: border-box;
+  }
 
-    .nav-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        position: relative;
-        cursor: pointer;
-    }
+  .gb-order-edit__inner {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 clamp(1rem, 3vw, 1.5rem);
+  }
 
-    .notification-dot {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        width: 8px;
-        height: 8px;
-        background: #dc3545;
-        border-radius: 50%;
-    }
+  .gb-order-edit__bc {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 1rem 0 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--oe-muted);
+  }
 
-    .profile-pic {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #FF7F50, #FFA500);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: 600;
-        font-size: 0.9rem;
-    }
+  .gb-order-edit__bc a {
+    color: var(--oe-muted);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.15s ease;
+  }
 
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 2rem;
-    }
+  .gb-order-edit__bc a:hover {
+    color: var(--oe-accent);
+  }
 
-    .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-    }
+  .gb-order-edit__bc span[aria-hidden] {
+    opacity: 0.45;
+  }
 
-    h1 {
-        font-size: 2.5rem;
-        font-weight: 300;
-        color: white;
-        margin: 0;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
+  .gb-order-edit__bc strong {
+    color: var(--oe-ink);
+    font-weight: 600;
+  }
 
-    .order-card {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        overflow: hidden;
-        margin-bottom: 2rem;
-    }
+  .gb-order-edit__top {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
 
-    .order-header {
-        background: linear-gradient(135deg, #FF7F50, #FFA500);
-        padding: 1.5rem;
-        color: white;
+  @media (min-width: 640px) {
+    .gb-order-edit__top {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
     }
+  }
 
-    .order-id {
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin: 0;
-    }
+  .gb-order-edit__top h1 {
+    margin: 0;
+    font-size: clamp(1.5rem, 3vw, 1.85rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--oe-ink);
+    line-height: 1.15;
+  }
 
-    .order-name {
-        font-size: 1.1rem;
-        margin: 0.5rem 0 0 0;
-        opacity: 0.9;
-    }
+  .gb-order-edit__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1rem;
+    border-radius: 10px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--oe-muted);
+    background: var(--oe-surface);
+    border: 1px solid var(--oe-border);
+    text-decoration: none;
+    box-shadow: var(--oe-shadow);
+    transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    flex-shrink: 0;
+  }
 
-    .form-container {
-        padding: 2rem;
-    }
+  .gb-order-edit__back:hover {
+    color: var(--oe-ink);
+    border-color: #cbd5e1;
+    background: #f8fafc;
+  }
 
-    .form-group {
-        display: flex;
-        align-items: center;
-        margin-bottom: 1rem;
-        gap: 1rem;
-    }
+  .gb-order-edit__card {
+    background: var(--oe-surface);
+    border-radius: var(--oe-radius);
+    border: 1px solid var(--oe-border);
+    box-shadow: var(--oe-shadow);
+    overflow: clip;
+    margin-bottom: 1.5rem;
+  }
 
-    label {
-        min-width: 120px;
-        font-weight: 500;
-        color: #495057;
-        font-size: 0.9rem;
-        text-align: right;
-    }
+  .gb-order-edit__card-head {
+    padding: 1.35rem 1.5rem 1.25rem;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: #fff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
 
-    input, select, textarea {
-        flex: 1;
-        padding: 0.75rem;
-        border: 1px solid #ced4da;
-        border-radius: 4px;
-        font-size: 1rem;
-        transition: border-color 0.2s ease;
-        box-sizing: border-box;
-    }
+  .gb-order-edit__card-head-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem 1rem;
+  }
 
-    input:focus, select:focus, textarea:focus {
-        outline: none;
-        border-color: #FF7F50;
-        box-shadow: 0 0 0 2px rgba(255, 127, 80, 0.2);
-    }
+  .gb-order-edit__order-no {
+    margin: 0;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+  }
 
-    .form-actions {
-        display: flex;
-        gap: 1rem;
-        margin-top: 2rem;
-        padding-top: 1rem;
-        border-top: 1px solid #e9ecef;
-        justify-content: flex-end;
-    }
+  .gb-order-edit__order-title {
+    margin: 0.35rem 0 0;
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    word-break: break-word;
+  }
 
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.75rem 1.5rem;
-        background: linear-gradient(135deg, #FF7F50, #FFA500);
-        color: white;
-        text-decoration: none;
-        border-radius: 4px;
-        font-size: 0.9rem;
-        font-weight: 500;
-        transition: all 0.2s ease;
-        border: none;
-        cursor: pointer;
-        box-shadow: 0 2px 4px rgba(255, 127, 80, 0.3);
-    }
+  .gb-order-edit__badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--oe-accent-soft);
+    color: #fb923c;
+    border: 1px solid rgba(251, 146, 60, 0.35);
+  }
 
-    .btn:hover {
-        background: linear-gradient(135deg, #FF6347, #FF8C00);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(255, 127, 80, 0.4);
-    }
+  .gb-order-edit__badge--done {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+    border-color: rgba(74, 222, 128, 0.35);
+  }
 
-    .btn-secondary {
-        background: linear-gradient(135deg, #FF8C00, #FFA500);
-        box-shadow: 0 2px 4px rgba(255, 140, 0, 0.3);
-    }
+  .gb-order-edit__card-body {
+    padding: 1.5rem clamp(1.15rem, 3vw, 1.75rem) 1.65rem;
+  }
 
-    .btn-secondary:hover {
-        background: linear-gradient(135deg, #FF7F00, #FF8C00);
-        box-shadow: 0 4px 8px rgba(255, 140, 0, 0.4);
-    }
+  .gb-order-edit__section-label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--oe-muted);
+    margin: 0 0 1rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px solid var(--oe-border);
+  }
 
-    .btn-danger {
-        background: linear-gradient(135deg, #FF4500, #FF6347);
-        box-shadow: 0 2px 4px rgba(255, 69, 0, 0.3);
-    }
+  /* Form (from partial) */
+  .gb-order-edit .gb-oe-form {
+    margin: 0;
+  }
 
-    .btn-danger:hover {
-        background: linear-gradient(135deg, #FF2500, #FF4500);
-        box-shadow: 0 4px 8px rgba(255, 69, 0, 0.4);
-    }
+  .gb-order-edit .gb-oe-grid {
+    display: grid;
+    gap: 1.15rem 1.25rem;
+  }
 
-    .form-errors {
-        color: #dc3545;
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
+  @media (min-width: 640px) {
+    .gb-order-edit .gb-oe-grid--2 {
+      grid-template-columns: 1fr 1fr;
     }
+  }
 
-    .delete-section {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        padding: 1.5rem;
-        border-left: 4px solid #FF4500;
-    }
+  .gb-order-edit .gb-oe-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
 
-    .delete-section h3 {
-        margin: 0 0 1rem 0;
-        color: #FF4500;
-        font-size: 1.1rem;
-        font-weight: 500;
-    }
+  .gb-order-edit .gb-oe-field--span2 {
+    grid-column: 1 / -1;
+  }
 
-    .delete-section p {
-        margin: 0 0 1rem 0;
-        color: #6c757d;
-        font-size: 0.9rem;
-    }
+  .gb-order-edit .gb-oe-field label,
+  .gb-order-edit .gb-oe-form label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--oe-ink);
+    text-align: left;
+  }
 
-    @media (max-width: 768px) {
-        .top-nav {
-            padding: 1rem;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        
-        .search-bar {
-            max-width: 100%;
-        }
-        
-        .container {
-            margin: 1rem auto;
-            padding: 0 1rem;
-        }
-        
-        .page-header {
-            flex-direction: column;
-            gap: 1rem;
-            align-items: stretch;
-        }
-        
-        .form-container {
-            padding: 1.5rem;
-        }
-        
-        .form-group {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 0.5rem;
-        }
-        
-        label {
-            min-width: auto;
-            text-align: left;
-        }
-        
-        .form-actions {
-            flex-direction: column;
-        }
+  .gb-order-edit .gb-oe-field input[type="text"],
+  .gb-order-edit .gb-oe-field input[type="number"],
+  .gb-order-edit .gb-oe-field input[type="datetime-local"],
+  .gb-order-edit .gb-oe-field select,
+  .gb-order-edit .gb-oe-field textarea {
+    width: 100%;
+    min-height: 44px;
+    padding: 0.6rem 0.9rem;
+    border: 1px solid var(--oe-border);
+    border-radius: 11px;
+    font-size: 0.9375rem;
+    font-family: inherit;
+    color: var(--oe-ink);
+    background: #f8fafc;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  }
+
+  .gb-order-edit .gb-oe-field textarea {
+    min-height: 88px;
+    resize: vertical;
+  }
+
+  .gb-order-edit .gb-oe-field input:focus,
+  .gb-order-edit .gb-oe-field select:focus,
+  .gb-order-edit .gb-oe-field textarea:focus {
+    outline: none;
+    border-color: rgba(234, 88, 12, 0.45);
+    background: #fff;
+    box-shadow: 0 0 0 3px var(--oe-accent-soft);
+  }
+
+  .gb-order-edit .gb-oe-field select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1rem;
+    padding-right: 2.5rem;
+    background-color: #f8fafc;
+  }
+
+  .gb-order-edit .gb-oe-field select:focus {
+    background-color: #fff;
+  }
+
+  .gb-order-edit .gb-oe-form ul {
+    list-style: none;
+    margin: 0.25rem 0 0;
+    padding: 0;
+  }
+
+  .gb-order-edit .gb-oe-form ul li {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #b91c1c;
+    padding: 0.4rem 0.65rem;
+    border-radius: 8px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+  }
+
+  .gb-order-edit .gb-oe-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+    padding-top: 1.35rem;
+    border-top: 1px solid var(--oe-border);
+  }
+
+  .gb-order-edit .gb-oe-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 1.35rem;
+    border-radius: 11px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: filter 0.15s ease, transform 0.15s ease;
+  }
+
+  .gb-order-edit .gb-oe-btn--primary {
+    color: #fff;
+    background: linear-gradient(135deg, #fb923c, #ea580c);
+    box-shadow: 0 2px 10px rgba(234, 88, 12, 0.28);
+  }
+
+  .gb-order-edit .gb-oe-btn--primary:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+  }
+
+  .gb-order-edit .gb-oe-btn--danger {
+    color: #fff;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+  }
+
+  .gb-order-edit .gb-oe-btn--danger:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+  }
+
+  .gb-order-edit__danger-card {
+    background: var(--oe-surface);
+    border-radius: var(--oe-radius);
+    border: 1px solid #fecaca;
+    box-shadow: var(--oe-shadow);
+    padding: 1.35rem 1.5rem 1.5rem;
+    border-left: 4px solid #ef4444;
+  }
+
+  .gb-order-edit__danger-card h2 {
+    margin: 0 0 0.35rem;
+    font-size: 1rem;
+    font-weight: 800;
+    color: #b91c1c;
+    letter-spacing: -0.02em;
+  }
+
+  .gb-order-edit__danger-card > p {
+    margin: 0 0 1.1rem;
+    font-size: 0.875rem;
+    color: var(--oe-muted);
+    line-height: 1.5;
+  }
+
+  /* Delete button (shared partial uses .btn.btn-danger) */
+  .gb-order-edit__danger-card .btn.btn-danger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 1.35rem;
+    border-radius: 11px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    font-family: var(--oe-font);
+    cursor: pointer;
+    border: none;
+    color: #fff;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+    transition: filter 0.15s ease, transform 0.15s ease;
+  }
+
+  .gb-order-edit__danger-card .btn.btn-danger:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gb-order-edit .gb-oe-btn--primary:hover,
+    .gb-order-edit .gb-oe-btn--danger:hover {
+      transform: none;
     }
+  }
 </style>
 
+<main class="gb-order-edit-scroll-root" id="order-edit-main" tabindex="-1">
+<div class="gb-order-edit">
+  <div class="gb-order-edit__inner">
+    <nav class="gb-order-edit__bc" aria-label="Breadcrumb">
+      <a href="{{ path('app_order_index') }}">Orders</a>
+      <span aria-hidden="true">/</span>
+      <strong>Edit #{{ order.id }}</strong>
+    </nav>
 
-<div class="container">
-    <div class="page-header">
-        <h1>Edit Order</h1>
-        <a href="{{ path('app_order_index') }}" class="btn btn-secondary">← Back to Orders</a>
+    <div class="gb-order-edit__top">
+      <h1>Edit order</h1>
+      <a href="{{ path('app_order_index') }}" class="gb-order-edit__back">← Back to orders</a>
     </div>
 
-    <div class="order-card">
-        <div class="order-header">
-            <h2 class="order-id">Order #{{ order.id }}</h2>
-            <p class="order-name">{{ order.Name }}</p>
+    <div class="gb-order-edit__card">
+      <div class="gb-order-edit__card-head">
+        <div class="gb-order-edit__card-head-row">
+          <div>
+            <p class="gb-order-edit__order-no">Order</p>
+            <h2 class="gb-order-edit__order-title">#{{ order.id }} · {{ order.Name }}</h2>
+          </div>
+          {% set st = order.Status ?? '' %}
+          <span class="gb-order-edit__badge {{ st == 'Completed' ? 'gb-order-edit__badge--done' : '' }}">{{ st ?: 'No status' }}</span>
         </div>
+      </div>
 
-         <div class="form-container">
-            {{ include('order/_form.html.twig', {'button_label': 'Update Order'}) }}
-        </div>
+      <div class="gb-order-edit__card-body">
+        <p class="gb-order-edit__section-label">Order details</p>
+        {{ include('order/_form.html.twig', { button_label: 'Save changes' }) }}
+      </div>
     </div>
 
-    <div class="delete-section">
-        <h3>Delete Order</h3>
-        <p>Once deleted, this order cannot be recovered.</p>
-    {{ include('order/_delete_form.html.twig') }}
+    <div class="gb-order-edit__danger-card">
+      <h2>Delete order</h2>
+      <p>This permanently removes the order from the system. This action cannot be undone.</p>
+      {{ include('order/_delete_form.html.twig') }}
     </div>
+  </div>
 </div>
+</main>
 {% endblock %}

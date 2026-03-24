@@ -165,6 +165,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         if ($this->createdAt === null) {
             $this->createdAt = new \DateTimeImmutable();
         }
+        
+        // Ensure email is set - use username@example.com as fallback if not provided
+        if ($this->email === null || $this->email === '') {
+            $this->email = $this->username . '@example.com';
+        }
     }
 
     #[\Deprecated]

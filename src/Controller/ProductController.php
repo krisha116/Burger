@@ -7,6 +7,7 @@ use App\Form\ProductType;
 use App\Repository\ProductRepository;
 use App\Repository\CategoryRepository;
 use App\Service\ActivityLogService;
+use App\Service\ProductMenuCategoryService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,6 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\Form\FormError;
 
 #[Route('/product')]
 final class ProductController extends AbstractController
@@ -28,7 +30,10 @@ final class ProductController extends AbstractController
         $search = trim((string) $request->query->get('search', ''));
         $categoryId = $request->query->getInt('category');
         $sort = (string) $request->query->get('sort', 'name');
-        $dir = strtolower((string) $request->query->get('dir', 'asc')) === 'desc' ? 'DESC' : 'ASC';
+        // Name sort is always A→Z on the catalog UI (no sort dropdown)
+        $dir = $sort === 'name'
+            ? 'ASC'
+            : (strtolower((string) $request->query->get('dir', 'asc')) === 'desc' ? 'DESC' : 'ASC');
 
         $qb = $productRepository->createQueryBuilder('p')
             ->leftJoin('p.Category', 'c')->addSelect('c')
@@ -66,24 +71,57 @@ final class ProductController extends AbstractController
             'search' => $search,
             'categoryId' => $categoryId,
             'sort' => $sort,
-            'dir' => strtolower($dir),
         ]);
     }
 
-   #[Route('/new', name: 'app_product_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
-    {
+    #[Route('/new', name: 'app_product_new', methods: ['GET', 'POST'])]
+    public function new(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        SluggerInterface $slugger,
+        ProductMenuCategoryService $productMenuCategoryService,
+        CategoryRepository $categoryRepository,
+    ): Response {
         $product = new Product();
         $form = $this->createForm(ProductType::class, $product);
+        $form->remove('datetime');
         $form->handleRequest($request);
 
+        $nameCategoryMap = $this->buildProductNameCategoryMap($productMenuCategoryService, $categoryRepository);
+
         if ($form->isSubmitted() && $form->isValid()) {
+            $this->applyCategoryFromProductName($product, $productMenuCategoryService, $categoryRepository);
+
             $imageFile = $form->get('image')->getData();
             if ($imageFile) {
                 $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
                 $safeFilename = $slugger->slug($originalFilename);
-                $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
 
+                $imageValid = true;
+
+                // Validate size (2MB)
+                $maxBytes = 2 * 1024 * 1024;
+                if ($imageFile->getSize() > $maxBytes) {
+                    $imageValid = false;
+                    $form->get('image')->addError(new FormError('Image must be 2MB or less.'));
+                }
+
+                // Validate extension based on original filename (no MIME guessers required)
+                $extension = strtolower((string) $imageFile->getClientOriginalExtension());
+                $allowed = ['jpg', 'jpeg', 'png'];
+                if ($extension === '' || !in_array($extension, $allowed, true)) {
+                    $imageValid = false;
+                    $form->get('image')->addError(new FormError('Please upload a valid image (jpg or png).'));
+                }
+
+                if (!$imageValid) {
+                    return $this->render('product/new.html.twig', [
+                        'product' => $product,
+                        'form' => $form,
+                    ]);
+                }
+
+                $newFilename = $safeFilename . '-' . uniqid() . '.' . $extension;
                 $imageFile->move($this->getParameter('images_directory'), $newFilename);
                 $product->setImage($newFilename);
             }
@@ -116,9 +154,9 @@ final class ProductController extends AbstractController
         return $this->render('product/new.html.twig', [
             'product' => $product,
             'form' => $form,
+            'nameCategoryMap' => $nameCategoryMap,
         ]);
     }
-
 
     #[Route('/{id}', name: 'app_product_show', methods: ['GET'])]
     public function show(Product $product): Response
@@ -128,40 +166,44 @@ final class ProductController extends AbstractController
         ]);
     }
 
-   #[Route('/{id}/edit', name: 'app_product_edit', methods: ['GET', 'POST'])]
-public function edit(Request $request, Product $product, EntityManagerInterface $entityManager): Response
-{
-    $this->denyUnlessOwnerOrAdmin($product);
+    #[Route('/{id}/edit', name: 'app_product_edit', methods: ['GET', 'POST'])]
+    public function edit(
+        Request $request,
+        Product $product,
+        EntityManagerInterface $entityManager,
+        ProductMenuCategoryService $productMenuCategoryService,
+        CategoryRepository $categoryRepository,
+    ): Response {
+        $this->denyUnlessOwnerOrAdmin($product);
 
-    $form = $this->createForm(ProductType::class, $product);
-    $form->handleRequest($request);
+        $form = $this->createForm(ProductType::class, $product);
+        $form->handleRequest($request);
 
-    if ($form->isSubmitted() && $form->isValid()) {
-        $entityManager->flush();
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->applyCategoryFromProductName($product, $productMenuCategoryService, $categoryRepository);
+            $entityManager->flush();
 
-        $user = $this->getUser();
-        if ($user instanceof \App\Entity\User) {
-            $this->activityLogService->logUpdate(
-                $user,
-                'Product',
-                $product->getId(),
-                ['name' => $product->getName()],
-                sprintf('Updated product: %s', $product->getName())
-            );
+            $user = $this->getUser();
+            if ($user instanceof \App\Entity\User) {
+                $this->activityLogService->logUpdate(
+                    $user,
+                    'Product',
+                    $product->getId(),
+                    ['name' => $product->getName()],
+                    sprintf('Updated product: %s', $product->getName())
+                );
+            }
+
+            $this->addFlash('success', 'Product updated successfully.');
+
+            return $this->redirectToRoute('app_product_index', [], Response::HTTP_SEE_OTHER);
         }
-        
-        $this->addFlash('success', 'Product updated successfully.');
 
-        // ✅ Redirect back to index after saving
-        return $this->redirectToRoute('app_product_index', [], Response::HTTP_SEE_OTHER);
+        return $this->render('product/edit.html.twig', [
+            'product' => $product,
+            'form' => $form,
+        ]);
     }
-
-    return $this->render('product/edit.html.twig', [
-        'product' => $product,
-        'form' => $form,
-    ]);
-}
-
 
     #[Route('/{id}', name: 'app_product_delete', methods: ['POST'])]
     public function delete(Request $request, Product $product, EntityManagerInterface $entityManager): Response
@@ -204,5 +246,41 @@ public function edit(Request $request, Product $product, EntityManagerInterface 
         }
 
         throw new AccessDeniedException('You cannot modify this record.');
+    }
+
+    /**
+     * @return array<string, int|null> preset title => category id or null if no DB category matches
+     */
+    private function buildProductNameCategoryMap(
+        ProductMenuCategoryService $productMenuCategoryService,
+        CategoryRepository $categoryRepository,
+    ): array {
+        $map = [];
+        foreach (ProductType::PRESET_NAME_CHOICES as $title) {
+            $labels = $productMenuCategoryService->inferLabelsFromTitle($title);
+            $canonical = $labels[0] ?? 'Other';
+            $cat = in_array($canonical, ['Burger', 'Fries', 'Drinks'], true)
+                ? $categoryRepository->findBestMatchForMenuLabel($canonical)
+                : null;
+            $map[$title] = $cat?->getId();
+        }
+
+        return $map;
+    }
+
+    private function applyCategoryFromProductName(
+        Product $product,
+        ProductMenuCategoryService $productMenuCategoryService,
+        CategoryRepository $categoryRepository,
+    ): void {
+        $labels = $productMenuCategoryService->inferLabelsFromTitle($product->getName() ?? '');
+        $canonical = $labels[0] ?? 'Other';
+        if (!in_array($canonical, ['Burger', 'Fries', 'Drinks'], true)) {
+            return;
+        }
+        $cat = $categoryRepository->findBestMatchForMenuLabel($canonical);
+        if ($cat !== null) {
+            $product->setCategory($cat);
+        }
     }
 }

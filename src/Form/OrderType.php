@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Form;
 
 use App\Entity\Order;
@@ -12,6 +11,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
@@ -19,36 +19,71 @@ class OrderType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $quickCreate = $options['quick_create'];
+
+        if (!$quickCreate) {
+            $builder
+                ->add('Name')
+                ->add('createAt', DateTimeType::class, [
+                    'widget' => 'single_text',
+                ]);
+        }
+
         $builder
-            ->add('Name')
-            ->add('createAt', DateTimeType::class, [
-                'widget' => 'single_text',
-            ])
             ->add('Total')
-            ->add('Status')
-            ->add('Customer', EntityType::class, [
+            ->add('Status', ChoiceType::class, [
+                'choices' => [
+                    'Pending' => 'Pending',
+                    'Completed' => 'Completed',
+                ],
+                'placeholder' => 'Select status',
+            ])
+            ->add('paymentMethod', ChoiceType::class, [
+                'choices' => [
+                    'Cash' => 'cash',
+                    'GCash' => 'gcash',
+                    'ATM' => 'atm',
+                ],
+                'placeholder' => 'Select payment method',
+                'required' => false,
+            ]);
+
+        if (!$quickCreate) {
+            $builder->add('Customer', EntityType::class, [
                 'class' => Customer::class,
                 'placeholder' => 'Select a customer',
                 'choice_label' => 'name',
                 'required' => false,
-            ])
-            ->add('products', EntityType::class, [
-                'class' => Product::class,
-                'multiple' => false,
-                'expanded' => false,
-                'required' => false,
-                'placeholder' => 'Select a product',
-                'choice_label' => 'name',
-            ])
-        ;
+            ]);
+        }
 
-        // Transform between Collection<Product> in the model and single Product in the form
+        $builder->add('products', EntityType::class, [
+            'class' => Product::class,
+            'multiple' => false,
+            'expanded' => false,
+            'required' => $quickCreate,
+            'placeholder' => $quickCreate ? 'Choose a product (grouped by category)' : 'Select a product',
+            'choice_label' => 'name',
+            'group_by' => function (?Product $product): string {
+                if ($product === null) {
+                    return 'Other';
+                }
+                $cat = $product->getCategory();
+
+                return $cat && $cat->getName() ? (string) $cat->getName() : 'Other';
+            },
+            'attr' => [
+                'data-order-product-select' => '1',
+            ],
+        ]);
+
         $builder->get('products')->addModelTransformer(
             new CallbackTransformer(
                 function ($products): ?Product {
                     if ($products instanceof Collection) {
                         return $products->first() ?: null;
                     }
+
                     return null;
                 },
                 function ($product) {
@@ -56,6 +91,7 @@ class OrderType extends AbstractType
                     if ($product) {
                         $collection->add($product);
                     }
+
                     return $collection;
                 }
             )
@@ -66,6 +102,8 @@ class OrderType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Order::class,
+            'quick_create' => false,
         ]);
+        $resolver->setAllowedTypes('quick_create', 'bool');
     }
 }

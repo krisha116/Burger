@@ -1,183 +1,93 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Product{% endblock %}
+{% block title %}New product{% endblock %}
 
 {% block body %}
-<style>
-/* === Compact Minimalist Orange-Themed Form === */
+{% block header_search %}{% endblock %}
 
-body {
-    background: linear-gradient(135deg, #ffb347, #ff7b00); /* soft orange gradient */
-    font-family: 'Poppins', sans-serif;
-}
+<main class="ue-page">
+    <div class="ue-shell">
+        <a href="{{ path('app_product_index') }}" class="ue-back">← Back to products</a>
 
-.form-container {
-    width: 75%;
-    max-width: 800px; /* narrower width */
-    margin: 50px auto;
-    background-color: #fff;
-    padding: 30px 40px; /* smaller padding for compact look */
-    border-radius: 14px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
-}
+        <div class="ue-card">
+            <header class="ue-card__head">
+                <p class="ue-card__eyebrow">Catalog</p>
+                <h1 class="ue-card__title">Create product</h1>
+            </header>
+            <div class="ue-card__body">
+                {{ form_start(form, {attr: {novalidate: 'novalidate'}}) }}
 
-.form-container:hover {
-    box-shadow: 0 6px 18px rgba(255, 123, 0, 0.15);
-}
+                <div class="ue-grid">
+                    <div class="ue-field">
+                        {{ form_label(form.name, 'Product name') }}
+                        {{ form_widget(form.name, {attr: {class: 'ue-select'}}) }}
+                        <div class="ue-errors">{{ form_errors(form.name) }}</div>
+                    </div>
+                    <div class="ue-field">
+                        {{ form_label(form.price, 'Price') }}
+                        {{ form_widget(form.price, {attr: {class: 'ue-input', placeholder: '0.00', inputmode: 'decimal'}}) }}
+                        <div class="ue-errors">{{ form_errors(form.price) }}</div>
+                    </div>
+                    <div class="ue-field">
+                        {{ form_label(form.category, 'Category') }}
+                        {{ form_widget(form.category, {attr: {class: 'ue-select'}}) }}
+                        <div class="ue-errors">{{ form_errors(form.category) }}</div>
+                        <span class="ue-lock-tag" aria-live="polite">Auto-filled from name; you can override.</span>
+                    </div>
+                </div>
 
-h1 {
-    text-align: center;
-    color: #ff7b00;
-    font-weight: 600;
-    margin-bottom: 25px; /* tighter space below title */
-    font-size: 1.7rem;
-}
+                <section class="ue-section ue-section--tight-top">
+                    <div class="ue-field">
+                        {{ form_label(form.description, 'Description') }}
+                        {{ form_widget(form.description, {attr: {class: 'ue-input ue-textarea', placeholder: 'Ingredients, allergens, or serving notes…', rows: 5}}) }}
+                        <div class="ue-errors">{{ form_errors(form.description) }}</div>
+                    </div>
+                </section>
 
-/* Compact 2-column grid */
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 18px 20px; /* less gap between fields */
-}
+                <section class="ue-section">
+                    <div class="ue-field ue-file-field">
+                        {{ form_label(form.image, 'Product image') }}
+                        {{ form_widget(form.image, {attr: {class: 'ue-file-input'}}) }}
+                        <div class="ue-errors">{{ form_errors(form.image) }}</div>
+                        <p class="ue-section__hint ue-section__hint--after-input">JPG or PNG, up to 2&nbsp;MB.</p>
+                    </div>
+                </section>
 
-.fs-field {
-    display: flex;
-    flex-direction: column;
-}
+                <div class="ue-actions">
+                    <a href="{{ path('app_product_index') }}" class="ue-btn ue-btn--ghost">Cancel</a>
+                    <button type="submit" class="ue-btn ue-btn--primary">Create product</button>
+                </div>
 
-.fs-label {
-    font-weight: 500;
-    margin-bottom: 6px;
-    color: #444;
-    font-size: 0.9rem;
-}
-
-.fs-input, .fs-textarea, select {
-    width: 100%;
-    padding: 10px 12px; /* smaller input height */
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    transition: all 0.2s ease;
-}
-
-.fs-input:focus, .fs-textarea:focus, select:focus {
-    border-color: #ff7b00;
-    box-shadow: 0 0 5px rgba(255, 123, 0, 0.3);
-    outline: none;
-}
-
-.fs-textarea {
-    min-height: 80px;
-    resize: vertical;
-}
-
-/* Make description and image fields span full width */
-.full-width {
-    grid-column: 1 / -1;
-}
-
-.fs-button-group {
-    text-align: center;
-    margin-top: 25px; /* smaller margin */
-}
-
-.fs-button {
-    background: linear-gradient(90deg, #ff9a3d, #ff7b00);
-    color: #fff;
-    font-size: 0.95rem;
-    font-weight: 500;
-    border: none;
-    border-radius: 10px;
-    padding: 10px 22px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.fs-button:hover {
-    background: linear-gradient(90deg, #ffb066, #ff944d);
-    box-shadow: 0 4px 10px rgba(255, 123, 0, 0.25);
-    transform: translateY(-2px);
-}
-
-.back-link {
-    display: block;
-    text-align: center;
-    margin-top: 20px;
-    color: #ff7b00;
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 0.9rem;
-}
-
-.back-link:hover {
-    color: #ff944d;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .form-container {
-        width: 90%;
-        padding: 25px;
-    }
-
-    h1 {
-        font-size: 1.4rem;
-    }
-}
-</style>
-
-<div class="form-container">
-    <h1>Create New Product</h1>
-
-    {{ form_start(form, { 'attr': { 'class': 'fs-form', 'novalidate': 'novalidate' } }) }}
-
-    <div class="form-grid">
-        <div class="fs-field">
-            {{ form_label(form.name, 'Name', { 'label_attr': {'class': 'fs-label'} }) }}
-            {{ form_widget(form.name, { 'attr': {'class': 'fs-input', 'placeholder': 'Product Name'} }) }}
-            {{ form_errors(form.name) }}
-        </div>
-
-        <div class="fs-field">
-            {{ form_label(form.price, 'Price', { 'label_attr': {'class': 'fs-label'} }) }}
-            {{ form_widget(form.price, { 'attr': {'class': 'fs-input', 'placeholder': '0.00'} }) }}
-            {{ form_errors(form.price) }}
-        </div>
-
-        <div class="fs-field">
-            {{ form_label(form.category, 'Category', { 'label_attr': {'class': 'fs-label'} }) }}
-            {{ form_widget(form.category, { 'attr': {'class': 'fs-input'} }) }}
-            {{ form_errors(form.category) }}
-        </div>
-
-        <div class="fs-field">
-            {{ form_label(form.datetime, 'Date & Time', { 'label_attr': {'class': 'fs-label'} }) }}
-            {{ form_widget(form.datetime, { 'attr': {'class': 'fs-input', 'placeholder': 'YYYY-MM-DD HH:MM:SS'} }) }}
-            {{ form_errors(form.datetime) }}
-        </div>
-
-        <div class="fs-field full-width">
-            {{ form_label(form.description, 'Description', { 'label_attr': {'class': 'fs-label'} }) }}
-            {{ form_widget(form.description, { 'attr': {'class': 'fs-textarea', 'placeholder': 'Enter product description'} }) }}
-            {{ form_errors(form.description) }}
-        </div>
-
-        <div class="fs-field full-width">
-            {{ form_label(form.image, 'Product Image', { 'label_attr': {'class': 'fs-label'} }) }}
-            {{ form_widget(form.image, { 'attr': {'class': 'fs-input'} }) }}
-            {{ form_errors(form.image) }}
+                {{ form_end(form) }}
+            </div>
         </div>
     </div>
+</main>
 
-    <div class="fs-button-group">
-        <button class="fs-button" type="submit">Create Product</button>
-    </div>
+<script type="application/json" id="product-name-category-map">{{ nameCategoryMap|default({})|json_encode|raw }}</script>
+<script>
+(function () {
+    document.addEventListener('DOMContentLoaded', function () {
+        var dataEl = document.getElementById('product-name-category-map');
+        var map = {};
+        if (dataEl && dataEl.textContent) {
+            try { map = JSON.parse(dataEl.textContent); } catch (e) { map = {}; }
+        }
+        var nameSelect = document.querySelector('[data-product-name-select="1"]');
+        var catSelect = document.querySelector('[data-product-category-select="1"]');
+        if (!nameSelect || !catSelect) return;
 
-    {{ form_end(form) }}
+        function syncCategory() {
+            var v = nameSelect.value;
+            if (!v || !Object.prototype.hasOwnProperty.call(map, v)) return;
+            var id = map[v];
+            if (id == null || id === '') return;
+            catSelect.value = String(id);
+        }
 
-    <a href="{{ path('app_product_index') }}" class="back-link">← Back to Product List</a>
-</div>
-
+        nameSelect.addEventListener('change', syncCategory);
+        syncCategory();
+    });
+})();
+</script>
 {% endblock %}

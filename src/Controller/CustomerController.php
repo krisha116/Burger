@@ -25,8 +25,6 @@ final class CustomerController extends AbstractController
     public function index(Request $request, CustomerRepository $customerRepository): Response
     {
         $search = trim((string) $request->query->get('search', ''));
-        $sort = (string) $request->query->get('sort', 'name');
-        $dir = strtolower((string) $request->query->get('dir', 'asc')) === 'desc' ? 'DESC' : 'ASC';
 
         $qb = $customerRepository->createQueryBuilder('c')
             ->leftJoin('c.createdBy', 'u')->addSelect('u');
@@ -36,26 +34,14 @@ final class CustomerController extends AbstractController
                ->setParameter('search', '%' . strtolower($search) . '%');
         }
 
-        switch ($sort) {
-            case 'email':
-                $qb->orderBy('c.Email', $dir);
-                break;
-            case 'date':
-                $qb->orderBy('c.createAt', $dir);
-                break;
-            case 'name':
-            default:
-                $qb->orderBy('c.Name', $dir);
-                break;
-        }
+        // Catalog UI: fixed sort by name A→Z (no sort dropdown)
+        $qb->orderBy('c.Name', 'ASC');
 
         $customers = $qb->getQuery()->getResult();
 
         return $this->render('customer/index.html.twig', [
             'customers' => $customers,
             'search' => $search,
-            'sort' => $sort,
-            'dir' => strtolower($dir),
         ]);
     }
 
@@ -64,6 +50,7 @@ final class CustomerController extends AbstractController
     {
         $customer = new Customer();
         $form = $this->createForm(CustomerType::class, $customer);
+        $form->remove('createAt');
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -111,6 +98,7 @@ final class CustomerController extends AbstractController
         $this->denyUnlessOwnerOrAdmin($customer);
 
         $form = $this->createForm(CustomerType::class, $customer);
+        $form->remove('createAt');
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

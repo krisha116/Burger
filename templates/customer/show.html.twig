@@ -1,305 +1,65 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Customer #{{ customer.id }}{% endblock %}
+{% block title %}{{ customer.Name }} — Customer{% endblock %}
 
 {% block body %}
-<style>
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background: linear-gradient(135deg, #FFA500, #FF7F50, #FF6347);
-        color: #2c3e50;
-        margin: 0;
-        padding: 0;
-        line-height: 1.6;
-        min-height: 100vh;
-    }
+<main class="us-page">
+    <div class="us-shell">
+        <a href="{{ path('app_customer_index') }}" class="ue-back">← Back to customers</a>
 
-    .top-nav {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem 2rem;
-        margin-bottom: 2rem;
-    }
+        {% if is_granted('ROLE_ADMIN') or (app.user and customer.createdBy and customer.createdBy.id == app.user.id) %}
+            <div class="ap-toolbar">
+                <a href="{{ path('app_customer_edit', {id: customer.id}) }}" class="ue-btn ue-btn--primary">Edit customer</a>
+                {{ include('customer/_delete_form.html.twig') }}
+            </div>
+        {% endif %}
 
-    .search-bar {
-        flex: 1;
-        max-width: 400px;
-        margin: 0 auto;
-        position: relative;
-    }
+        <article class="us-card">
+            <header class="us-card__profile">
+                {% set cd_name = customer.Name|default('') %}
+                <div class="us-avatar" aria-hidden="true">{{ (cd_name ?: '?')|trim|first|upper }}</div>
+                <div>
+                    <h1 class="us-name">{{ cd_name ?: 'Customer' }}</h1>
+                    <p class="us-email">
+                        <a href="mailto:{{ customer.Email }}">{{ customer.Email }}</a>
+                    </p>
+                </div>
+            </header>
 
-    .search-input {
-        width: 100%;
-        padding: 0.75rem 1rem 0.75rem 2.5rem;
-        border: none;
-        border-radius: 25px;
-        background: white;
-        font-size: 0.9rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .search-icon {
-        position: absolute;
-        left: 0.75rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #6c757d;
-        font-size: 1rem;
-    }
-
-    .nav-icons {
-        display: flex;
-        gap: 1rem;
-        align-items: center;
-    }
-
-    .nav-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        position: relative;
-        cursor: pointer;
-    }
-
-    .notification-dot {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        width: 8px;
-        height: 8px;
-        background: #dc3545;
-        border-radius: 50%;
-    }
-
-    .profile-pic {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #FF7F50, #FFA500);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: 600;
-        font-size: 0.9rem;
-    }
-
-    .container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 0 2rem;
-    }
-
-    .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-    }
-
-    h1 {
-        font-size: 2.5rem;
-        font-weight: 300;
-        color: white;
-        margin: 0;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .customer-card {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        overflow: hidden;
-        margin-bottom: 2rem;
-    }
-
-    .customer-header {
-        background: #f8f9fa;
-        padding: 1.5rem;
-        border-bottom: 1px solid #e9ecef;
-    }
-
-    .customer-id {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #2c3e50;
-        margin: 0;
-    }
-
-    .customer-name {
-        font-size: 1.1rem;
-        color: #6c757d;
-        margin: 0.5rem 0 0 0;
-    }
-
-    .customer-details {
-        padding: 1.5rem;
-    }
-
-    .detail-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem 0;
-        border-bottom: 1px solid #f1f3f4;
-    }
-
-    .detail-row:last-child {
-        border-bottom: none;
-    }
-
-    .detail-label {
-        font-weight: 500;
-        color: #495057;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .detail-value {
-        color: #2c3e50;
-        font-weight: 500;
-    }
-
-    .actions {
-        display: flex;
-        gap: 1rem;
-        padding: 1.5rem;
-        background: #f8f9fa;
-        border-top: 1px solid #e9ecef;
-    }
-
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.75rem 1.5rem;
-        background: linear-gradient(135deg, #FF7F50, #FFA500);
-        color: white;
-        text-decoration: none;
-        border-radius: 4px;
-        font-size: 0.9rem;
-        font-weight: 500;
-        transition: all 0.2s ease;
-        border: none;
-        cursor: pointer;
-        box-shadow: 0 2px 4px rgba(255, 127, 80, 0.3);
-    }
-
-    .btn:hover {
-        background: linear-gradient(135deg, #FF6347, #FF8C00);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(255, 127, 80, 0.4);
-    }
-
-    .btn-secondary {
-        background: linear-gradient(135deg, #FF8C00, #FFA500);
-        box-shadow: 0 2px 4px rgba(255, 140, 0, 0.3);
-    }
-
-    .btn-secondary:hover {
-        background: linear-gradient(135deg, #FF7F00, #FF8C00);
-        box-shadow: 0 4px 8px rgba(255, 140, 0, 0.4);
-    }
-
-    .btn-danger {
-        background: linear-gradient(135deg, #FF4500, #FF6347);
-        box-shadow: 0 2px 4px rgba(255, 69, 0, 0.3);
-    }
-
-    .btn-danger:hover {
-        background: linear-gradient(135deg, #FF2500, #FF4500);
-        box-shadow: 0 4px 8px rgba(255, 69, 0, 0.4);
-    }
-
-    @media (max-width: 768px) {
-        .top-nav {
-            padding: 1rem;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        
-        .search-bar {
-            max-width: 100%;
-        }
-        
-        .container {
-            margin: 1rem auto;
-            padding: 0 1rem;
-        }
-        
-        .page-header {
-            flex-direction: column;
-            gap: 1rem;
-            align-items: stretch;
-        }
-        
-        .detail-row {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.5rem;
-        }
-        
-        .actions {
-            flex-direction: column;
-        }
-    }
-</style>
-
-
-
-<div class="container">
-    <div class="page-header">
-        <h1>Customer Details</h1>
-        <a href="{{ path('app_customer_index') }}" class="btn btn-secondary">← Back to Customers</a>
+            <dl class="us-dl">
+                <div>
+                    <dt>Customer ID</dt>
+                    <dd><span class="cd-mono">#{{ customer.id }}</span></dd>
+                </div>
+                <div>
+                    <dt>Phone</dt>
+                    <dd>
+                        {% if customer.Phone %}
+                            <a href="tel:{{ customer.Phone }}">{{ customer.Phone }}</a>
+                        {% else %}
+                            <span class="cd-empty">—</span>
+                        {% endif %}
+                    </dd>
+                </div>
+                <div class="us-dl__full">
+                    <dt>Member since</dt>
+                    <dd>
+                        {% if customer.createAt %}
+                            <time datetime="{{ customer.createAt|date('c') }}">{{ customer.createAt|date('M j, Y') }}</time>
+                            <p class="us-meta-note">{{ customer.createAt|date('g:i A') }} · {{ customer.createAt|date('Y-m-d H:i:s') }}</p>
+                        {% else %}
+                            <span class="cd-empty">—</span>
+                        {% endif %}
+                    </dd>
+                </div>
+                {% if customer.createdBy %}
+                    <div class="us-dl__full">
+                        <dt>Recorded by</dt>
+                        <dd>{{ customer.createdBy.username }}</dd>
+                    </div>
+                {% endif %}
+            </dl>
+        </article>
     </div>
-
-    <div class="customer-card">
-        <div class="customer-header">
-            <h2 class="customer-id">Customer #{{ customer.id }}</h2>
-            <p class="customer-name">{{ customer.Name }}</p>
-        </div>
-
-        <div class="customer-details">
-            <div class="detail-row">
-                <span class="detail-label">Customer ID</span>
-                <span class="detail-value">#{{ customer.id }}</span>
-            </div>
-            
-            <div class="detail-row">
-                <span class="detail-label">Name</span>
-                <span class="detail-value">{{ customer.Name }}</span>
-            </div>
-            
-            <div class="detail-row">
-                <span class="detail-label">Email</span>
-                <span class="detail-value">{{ customer.Email }}</span>
-            </div>
-            
-            <div class="detail-row">
-                <span class="detail-label">Phone</span>
-                <span class="detail-value">{{ customer.Phone }}</span>
-            </div>
-            
-            <div class="detail-row">
-                <span class="detail-label">Created At</span>
-                <span class="detail-value">{{ customer.createAt ? customer.createAt|date('M d, Y \a\t g:i A') : 'Not set' }}</span>
-            </div>
-        </div>
-
-        <div class="actions">
-            {% if is_granted('ROLE_ADMIN') or (app.user and customer.createdBy and customer.createdBy.id == app.user.id) %}
-            <a href="{{ path('app_customer_edit', {'id': customer.id}) }}" class="btn">Edit Customer</a>
-            {{ include('customer/_delete_form.html.twig') }}
-            {% endif %}
-        </div>
-    </div>
-</div>
+</main>
 {% endblock %}

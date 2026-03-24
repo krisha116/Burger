@@ -13,7 +13,14 @@ class LoginController extends AbstractController
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
         if ($this->getUser()) {
-            return $this->redirectToRoute('app_dashboard');
+            if ($this->isGranted('ROLE_ADMIN')) {
+                return $this->redirectToRoute('app_dashboard');
+            }
+            if ($this->isGranted('ROLE_STAFF')) {
+                return $this->redirectToRoute('app_dashboard');
+            }
+
+            return $this->redirectToRoute('app_home');
         }
 
         // get the login error if there is one
@@ -21,7 +28,17 @@ class LoginController extends AbstractController
         // last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
 
-        return $this->render('security/login.html.twig', ['last_username' => $lastUsername, 'error' => $error]);
+        $response = $this->render('security/login.html.twig', ['last_username' => $lastUsername, 'error' => $error]);
+        
+        // Prevent caching of the login page to prevent back button access after logout
+        $response->headers->addCacheControlDirective('no-cache', true);
+        $response->headers->addCacheControlDirective('no-store', true);
+        $response->headers->addCacheControlDirective('must-revalidate', true);
+        $response->headers->addCacheControlDirective('max-age', 0);
+        $response->headers->set('Pragma', 'no-cache');
+        $response->headers->set('Expires', '0');
+        
+        return $response;
     }
 
     #[Route(path: '/logout', name: 'app_logout')]
