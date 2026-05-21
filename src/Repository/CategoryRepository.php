@@ -3,7 +3,9 @@
 namespace App\Repository;
 
 use App\Entity\Category;
+use App\DataFixtures\CategoryFixtures;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -16,8 +18,16 @@ class CategoryRepository extends ServiceEntityRepository
         parent::__construct($registry, Category::class);
     }
 
+    public function createMenuCategoriesQueryBuilder(): QueryBuilder
+    {
+        return $this->createQueryBuilder('c')
+            ->where('LOWER(c.name) IN (:names)')
+            ->setParameter('names', CategoryFixtures::MENU_CATEGORIES)
+            ->orderBy('c.name', 'ASC');
+    }
+
     /**
-     * Match a canonical menu label (Burger, Fries, Drinks) to a Category entity by name.
+     * Match a canonical menu label (Burger, Fries, Drinks) to burger / fries / milktea.
      */
     public function findBestMatchForMenuLabel(string $canonicalLabel): ?Category
     {
@@ -26,25 +36,19 @@ class CategoryRepository extends ServiceEntityRepository
             return null;
         }
 
-        foreach ($this->findAll() as $cat) {
-            $n = trim($cat->getName() ?? '');
-            if ($n !== '' && strcasecmp($n, $canonicalLabel) === 0) {
-                return $cat;
-            }
-        }
+        $dbName = match ($canonicalLabel) {
+            'Burger' => 'burger',
+            'Fries' => 'fries',
+            'Drinks' => 'milktea',
+            default => null,
+        };
 
-        $patterns = [
-            'Burger' => '/burger/i',
-            'Fries' => '/fries|french/i',
-            'Drinks' => '/drink|beverage|tea|coffee|juice|soda|smoothie|shake|milk|boba/i',
-        ];
-        $re = $patterns[$canonicalLabel] ?? null;
-        if ($re === null) {
+        if ($dbName === null) {
             return null;
         }
 
         foreach ($this->findAll() as $cat) {
-            if (preg_match($re, $cat->getName() ?? '')) {
+            if (strcasecmp(trim($cat->getName() ?? ''), $dbName) === 0) {
                 return $cat;
             }
         }

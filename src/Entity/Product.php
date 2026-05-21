@@ -8,30 +8,60 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Delete;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
+#[ApiResource(
+    operations: [
+        new Get(),
+        new GetCollection(),
+        new Post(),
+        new Get(),
+        new Put(),
+        new Delete()
+    ],
+    normalizationContext: ['groups' => ['Product:read']],
+    denormalizationContext: ['groups' => ['Product:write']]
+)]
 class Product
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['Product:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['Product:read', 'Product:write'])]
     private ?string $Name = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups(['Product:read', 'Product:write'])]
+
     private ?string $Description = null;
 
     #[ORM\Column]
+    #[Groups(['Product:read', 'Product:write'])]
+
     private ?float $Price = null;
 
+    #[ORM\Column(options: ['default' => 0])]
+    #[Groups(['Product:read', 'Product:write'])]
+    private int $stock = 0;
 
     #[ORM\Column]
+    #[Groups(['Product:read', 'Product:write'])]
     private ?\DateTimeImmutable $Datetime = null;
 
     #[ORM\ManyToOne(inversedBy: 'products')]
+    #[Groups(['Product:read', 'Product:write'])]
     private ?Category $Category = null;
 
     #[ORM\ManyToOne]
@@ -39,6 +69,7 @@ class Product
     private ?User $createdBy = null;
 
      #[ORM\Column(length: 255)]
+    #[Groups(['Product:read', 'Product:write'])]
     private ?string $image = null;
 
      /**
@@ -50,6 +81,7 @@ class Product
      public function __construct()
      {
          $this->orders = new ArrayCollection();
+         $this->stock = 0;
      }
 
     public function getId(): ?int
@@ -93,6 +125,17 @@ class Product
         return $this;
     }
 
+    public function getStock(): int
+    {
+        return $this->stock;
+    }
+
+    public function setStock(int $stock): static
+    {
+        $this->stock = $stock;
+
+        return $this;
+    }
 
     public function getDatetime(): ?\DateTimeImmutable
     {

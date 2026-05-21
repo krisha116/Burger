@@ -418,6 +418,10 @@
         <div class="gb-login-alert" role="alert">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
       {% endif %}
 
+      {% for message in app.flashes('oauth_error') %}
+        <div class="gb-login-alert" role="alert">{{ message }}</div>
+      {% endfor %}
+
       {% if app.user %}
         <div class="gb-login-session">
           Signed in as <strong>{{ app.user.userIdentifier }}</strong> —
@@ -456,6 +460,8 @@
 
         <button type="submit" class="gb-login-submit">Sign in</button>
       </form>
+
+      {% block staff_google_oauth %}{% endblock %}
 
       <div class="gb-login-divider">New here?</div>
       <a href="{{ path('app_register') }}" class="gb-login-register">Create an account</a>

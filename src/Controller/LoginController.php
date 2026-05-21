@@ -28,7 +28,7 @@ class LoginController extends AbstractController
         // last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
 
-        $response = $this->render('security/login.html.twig', ['last_username' => $lastUsername, 'error' => $error]);
+        $response = $this->render('login.html.twig', ['last_username' => $lastUsername, 'error' => $error]);
         
         // Prevent caching of the login page to prevent back button access after logout
         $response->headers->addCacheControlDirective('no-cache', true);

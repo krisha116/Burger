@@ -49,12 +49,16 @@ class OrderType extends AbstractType
             ]);
 
         if (!$quickCreate) {
-            $builder->add('Customer', EntityType::class, [
+            $customerFieldOptions = [
                 'class' => Customer::class,
                 'placeholder' => 'Select a customer',
                 'choice_label' => 'name',
                 'required' => false,
-            ]);
+            ];
+            if ($options['customer_disabled']) {
+                $customerFieldOptions['disabled'] = true;
+            }
+            $builder->add('Customer', EntityType::class, $customerFieldOptions);
         }
 
         $builder->add('products', EntityType::class, [
@@ -103,7 +107,9 @@ class OrderType extends AbstractType
         $resolver->setDefaults([
             'data_class' => Order::class,
             'quick_create' => false,
+            'customer_disabled' => false,
         ]);
         $resolver->setAllowedTypes('quick_create', 'bool');
+        $resolver->setAllowedTypes('customer_disabled', 'bool');
     }
 }

@@ -93,7 +93,7 @@ final class OrderController extends AbstractController
             if ($label !== null && $label !== '') {
                 $order->setName($label);
             } else {
-                $order->setName(sprintf('Order %s', (new \DateTimeImmutable())->format('YmdHis')));
+                $order->setName('Order (no product selected)');
             }
 
             $user = $this->getUser();
@@ -135,11 +135,15 @@ final class OrderController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_order_show', methods: ['GET'])]
-    public function show(int $id, OrderRepository $orderRepository): Response
+    public function show(int $id, OrderRepository $orderRepository, EntityManagerInterface $entityManager): Response
     {
         $order = $orderRepository->findOneWithDetails($id);
         if (!$order) {
             throw $this->createNotFoundException('Order not found.');
+        }
+
+        if ($this->maybeUpgradeLegacyOrderName($order)) {
+            $entityManager->flush();
         }
 
         return $this->render('order/show.html.twig', [
@@ -148,7 +152,7 @@ final class OrderController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_order_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Order $order, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, Order $order, EntityManagerInterface $entityManager, OrderRepository $orderRepository): Response
     {
         $this->denyUnlessOwnerOrAdmin($order);
 
@@ -156,10 +160,25 @@ final class OrderController extends AbstractController
             throw new AccessDeniedException('Completed orders cannot be modified.');
         }
 
-        $form = $this->createForm(OrderType::class, $order);
+        $orderId = $order->getId();
+        if ($orderId !== null) {
+            $withDetails = $orderRepository->findOneWithDetails($orderId);
+            if ($withDetails !== null) {
+                $order = $withDetails;
+            }
+        }
+
+        if ($this->maybeUpgradeLegacyOrderName($order)) {
+            $entityManager->flush();
+        }
+
+        $form = $this->createForm(OrderType::class, $order, [
+            'customer_disabled' => true,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $this->maybeUpgradeLegacyOrderName($order);
             $entityManager->flush();
 
             $user = $this->getUser();
@@ -212,6 +231,57 @@ final class OrderController extends AbstractController
         }
 
         return $this->redirectToRoute('app_order_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    /**
+     * Replace old auto-generated titles like "Customer Order 20260321174535" with "Product — Customer".
+     *
+     * @return bool True if the stored name was updated
+     */
+    private function maybeUpgradeLegacyOrderName(Order $order): bool
+    {
+        $name = trim((string) ($order->getName() ?? ''));
+        if ($name === '') {
+            return false;
+        }
+
+        // Legacy staff/customer auto-titles: "Customer Order" or "Order" + timestamp digits
+        if (!preg_match('/^(Customer Order|Order)\s+\d{12,17}$/iu', $name)) {
+            return false;
+        }
+
+        $customerPart = trim((string) ($order->getCustomer()?->getName() ?? ''));
+        if ($customerPart === '') {
+            $customerPart = 'Guest';
+        }
+
+        $productNames = [];
+        foreach ($order->getProducts() as $p) {
+            $n = trim((string) ($p->getName() ?? ''));
+            if ($n !== '') {
+                $productNames[] = $n;
+            }
+        }
+        $productNames = array_values(array_unique($productNames, SORT_STRING));
+        $productsPart = implode(', ', $productNames);
+
+        if ($productsPart !== '') {
+            $orderLabel = sprintf('%s — %s', $productsPart, $customerPart);
+        } else {
+            $orderLabel = sprintf('Order — %s', $customerPart);
+        }
+
+        if (mb_strlen($orderLabel) > 255) {
+            $orderLabel = mb_substr($orderLabel, 0, 252).'…';
+        }
+
+        if ($orderLabel === $name) {
+            return false;
+        }
+
+        $order->setName($orderLabel);
+
+        return true;
     }
 
     private function denyUnlessOwnerOrAdmin(Order $order): void

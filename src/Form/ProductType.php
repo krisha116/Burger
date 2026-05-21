@@ -10,14 +10,15 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use App\Repository\CategoryRepository;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 // NOTE: Intentionally not using FileConstraint here because some environments
 // lack php_fileinfo and Symfony may still try to run the MIME guesser.
 
 class ProductType extends AbstractType
 {
     /**
-     * Preset catalog titles (value = stored product name). Used for create/edit product pickers.
+     * Preset catalog titles for auto category mapping (product name is a free-text field).
      */
     public const PRESET_NAME_CHOICES = [
         'Classic Cheeseburger' => 'Classic Cheeseburger',
@@ -42,18 +43,21 @@ class ProductType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('name', ChoiceType::class, [
-                'choices' => self::PRESET_NAME_CHOICES,
-                'placeholder' => 'Select a product name',
-                'attr' => ['data-product-name-select' => '1'],
+            ->add('name', TextType::class, [
+                'attr' => [
+                    'class' => 'ue-input',
+                    'placeholder' => 'Enter product name',
+                    'data-product-name-input' => '1',
+                ],
             ])
             ->add('description')
             ->add('price')
             ->add('category', EntityType::class, [
                 'class' => Category::class,
                 'choice_label' => 'name',
-                'placeholder' => 'Select a Category',
+                'placeholder' => 'Select a category',
                 'required' => false,
+                'query_builder' => fn (CategoryRepository $repository) => $repository->createMenuCategoriesQueryBuilder(),
                 'attr' => ['data-product-category-select' => '1'],
             ])
             ->add('datetime', DateTimeType::class, [

@@ -17,5 +17,25 @@ services:
     App\:
         resource: '../src/'
 
+    app.oauth_http_client:
+        class: GuzzleHttp\Client
+        arguments:
+            -
+                verify: 'C:/cacert/cacert.pem'
+
+    App\Service\BrevoContactService:
+        arguments:
+            $brevoApiKey: '%env(BREVO_API_KEY)%'
+            $brevoFromEmail: '%env(BREVO_FROM_EMAIL)%'
+            $brevoToEmail: '%env(BREVO_TO_EMAIL)%'
+
+    App\Service\OAuthPublicHostResolver:
+        arguments:
+            $oauthPublicHost: '%env(default::OAUTH_PUBLIC_HOST)%'
+
+    App\Service\MobileGoogleOAuthBridge:
+        arguments:
+            $mobileDeepLinkBase: 'act1://oauth/callback'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

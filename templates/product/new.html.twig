@@ -20,7 +20,7 @@
                 <div class="ue-grid">
                     <div class="ue-field">
                         {{ form_label(form.name, 'Product name') }}
-                        {{ form_widget(form.name, {attr: {class: 'ue-select'}}) }}
+                        {{ form_widget(form.name) }}
                         <div class="ue-errors">{{ form_errors(form.name) }}</div>
                     </div>
                     <div class="ue-field">
@@ -73,20 +73,20 @@
         if (dataEl && dataEl.textContent) {
             try { map = JSON.parse(dataEl.textContent); } catch (e) { map = {}; }
         }
-        var nameSelect = document.querySelector('[data-product-name-select="1"]');
+        var nameInput = document.querySelector('[data-product-name-input="1"]');
         var catSelect = document.querySelector('[data-product-category-select="1"]');
-        if (!nameSelect || !catSelect) return;
+        if (!nameInput || !catSelect) return;
 
         function syncCategory() {
-            var v = nameSelect.value;
+            var v = nameInput.value.trim();
             if (!v || !Object.prototype.hasOwnProperty.call(map, v)) return;
             var id = map[v];
             if (id == null || id === '') return;
             catSelect.value = String(id);
         }
 
-        nameSelect.addEventListener('change', syncCategory);
-        syncCategory();
+        nameInput.addEventListener('input', syncCategory);
+        nameInput.addEventListener('change', syncCategory);
     });
 })();
 </script>

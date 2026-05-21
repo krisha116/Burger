@@ -11,6 +11,7 @@ use App\Repository\OrderRepository;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Service\BrevoContactService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -92,6 +93,67 @@ final class CustomerLandingController extends AbstractController
         return $this->render('customer/about.html.twig', [
             'cartProducts' => $cartProducts,
         ]);
+    }
+
+    #[Route('/contact', name: 'customer_contact', methods: ['GET'])]
+    public function contactPage(Request $request): Response
+    {
+        if ('1' === (string) $request->query->get('sent')) {
+            $this->addFlash('success', 'Thanks! Your message has been sent.');
+        }
+
+        $cartProductIds = $this->getCartProductIds($request);
+        $cartProducts = [];
+        if (!empty($cartProductIds)) {
+            $cartProducts = $this->loadCartProducts($cartProductIds);
+        }
+
+        return $this->render('customer/contact.html.twig', [
+            'cartProducts' => $cartProducts,
+        ]);
+    }
+
+    #[Route('/contact', name: 'customer_contact_submit', methods: ['POST'])]
+    public function contactSubmit(Request $request, BrevoContactService $brevo): Response
+    {
+        $token = (string) $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('contact_submit', $token)) {
+            $this->addFlash('error', 'Invalid form submission. Please try again.');
+
+            return $this->redirectToRoute('customer_contact');
+        }
+
+        $name = trim((string) $request->request->get('name', ''));
+        $email = trim((string) $request->request->get('email', ''));
+        $message = trim((string) $request->request->get('message', ''));
+
+        if ($name === '' || $email === '' || $message === '') {
+            $this->addFlash('error', 'Please fill out all fields.');
+
+            return $this->redirectToRoute('customer_contact');
+        }
+
+        if (false === filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $this->addFlash('error', 'Please enter a valid email address.');
+
+            return $this->redirectToRoute('customer_contact');
+        }
+
+        if (mb_strlen($message) > 4000) {
+            $this->addFlash('error', 'Message is too long.');
+
+            return $this->redirectToRoute('customer_contact');
+        }
+
+        try {
+            $brevo->sendContactMessage($name, $email, 'Website contact form', $message);
+        } catch (\Throwable) {
+            $this->addFlash('error', 'Sorry — we could not send your message right now. Please try again later.');
+
+            return $this->redirectToRoute('customer_contact');
+        }
+
+        return $this->redirectToRoute('customer_contact', ['sent' => 1]);
     }
 
     #[Route('/my-orders', name: 'customer_my_orders', methods: ['GET'])]
@@ -240,10 +302,17 @@ final class CustomerLandingController extends AbstractController
         }
 
         $lineNames = array_values(array_filter($lineNames, static fn (string $n): bool => $n !== ''));
-        $orderLabel = implode(', ', $lineNames);
-        if ($orderLabel === '') {
-            $orderLabel = sprintf('Customer Order %s', (new \DateTimeImmutable())->format('YmdHis'));
-        } elseif (mb_strlen($orderLabel) > 255) {
+        $productsPart = implode(', ', $lineNames);
+        $customerDisplay = trim((string) ($customer->getName() ?? ''));
+        if ($customerDisplay === '') {
+            $customerDisplay = 'Guest';
+        }
+        if ($productsPart !== '') {
+            $orderLabel = sprintf('%s — %s', $productsPart, $customerDisplay);
+        } else {
+            $orderLabel = sprintf('Order — %s', $customerDisplay);
+        }
+        if (mb_strlen($orderLabel) > 255) {
             $orderLabel = mb_substr($orderLabel, 0, 252).'…';
         }
         $order->setName($orderLabel);

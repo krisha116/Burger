@@ -5,11 +5,10 @@
 {% set url_menu = path('customer_menu') %}
 {% set url_about = path('customer_about') %}
 {% set url_home = path('app_home') %}
-{% set off_landing = on_menu_page or on_about_page %}
+{% set off_landing = off_landing|default(on_menu_page or on_about_page) %}
 {% set link_home = off_landing ? url_home : '#home' %}
 {% set link_explore = off_landing ? url_home ~ '#best-seller' : '#best-seller' %}
-{# Contact footer is on home, /menu, and /about — always same-page #contact #}
-{% set link_contact = '#contact' %}
+{% set link_contact = path('customer_contact') %}
 
 <div class="gb-top-nav">
   <div class="gb-top-nav-inner">
@@ -26,6 +25,7 @@
       <li>
         <a href="{{ path('customer_my_orders') }}" class="{{ on_my_orders_page ? 'gb-nav-link--active' : '' }}"{% if on_my_orders_page %} aria-current="page"{% endif %}>Order</a>
       </li>
+      <li><a href="{{ link_contact }}">Contact us</a></li>
     </ul>
 
     <div class="gb-nav-right">

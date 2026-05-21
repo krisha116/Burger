@@ -1,198 +1,74 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ product.Name }}{% endblock %}
+{% block title %}{{ product.name }}{% endblock %}
 
 {% block body %}
-<style>
-    body {
-        background: #C25B3C;
-        margin: 0;
-        min-height: 100vh;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    }
+{% block header_search %}{% endblock %}
 
-    .product-container {
-        max-width: 800px; /* narrowed width */
-        background: linear-gradient(135deg, #ffae42, #ff7b00, #ff6b35);
-        color: #2c2c2c;
-        padding: 25px 30px; /* reduced padding */
-        border-radius: 12px;
-        margin: 40px auto;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
+<main class="ue-page">
+    <div class="ue-shell">
+        <a href="{{ path('app_product_index') }}" class="ue-back">← Back to products</a>
 
-    .page-header {
-        display: flex;
-        align-items: center;
-        color: #2c2c2c;
-        font-size: 32px; /* smaller title */
-        font-weight: 600;
-        margin-bottom: 25px;
-        background: white;
-        padding: 15px 20px;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    .page-header::before {
-        content: "📦";
-        margin-right: 10px;
-        font-size: 26px;
-    }
-
-    .product-details-table {
-        background: white;
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    .product-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .product-table th,
-    .product-table td {
-        padding: 10px 15px; /* tighter table spacing */
-        font-size: 15px;
-        border-bottom: 1px solid #f0f0f0;
-        vertical-align: middle;
-    }
-
-    .product-table th {
-        background: #F4A460;
-        font-weight: 600;
-        width: 35%;
-        color: #2c2c2c;
-    }
-
-    .product-table tr:last-child th,
-    .product-table tr:last-child td {
-        border-bottom: none;
-    }
-
-    .product-image {
-        max-width: 120px;
-        border-radius: 6px;
-        margin-top: 5px;
-    }
-
-    .action-buttons {
-        display: flex;
-        gap: 10px;
-        margin-top: 20px;
-        justify-content: flex-end;
-    }
-
-    .btn {
-        padding: 8px 20px; /* smaller buttons */
-        border-radius: 6px;
-        font-size: 14px;
-        font-weight: 600;
-        text-decoration: none;
-        transition: all 0.2s ease;
-        border: none;
-        cursor: pointer;
-    }
-
-    .btn-edit {
-        background: #4A90E2;
-        color: white;
-    }
-
-    .btn-edit:hover {
-        background: #357ABD;
-        transform: translateY(-2px);
-    }
-
-    .btn-delete {
-        background: #E74C3C;
-        color: white;
-    }
-
-    .btn-delete:hover {
-        background: #C0392B;
-        transform: translateY(-2px);
-    }
-
-    .btn-back {
-        background: #95A5A6;
-        color: white;
-    }
-
-    .btn-back:hover {
-        background: #7F8C8D;
-        transform: translateY(-2px);
-    }
-
-    @media (max-width: 768px) {
-        .product-container {
-            max-width: 95%;
-            padding: 20px;
-        }
-
-        .page-header {
-            font-size: 24px;
-            padding: 12px 15px;
-        }
-
-        .product-table th,
-        .product-table td {
-            padding: 8px 12px;
-            font-size: 13px;
-        }
-
-        .product-image {
-            max-width: 90px;
-        }
-
-        .action-buttons {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .btn {
-            width: 100%;
-            text-align: center;
-        }
-    }
-</style>
-
-<div class="product-container">
-    <div class="page-header">Product Details</div>
-
-    <div class="product-details-table">
-        <table class="product-table">
-            <tr><th>ID</th><td>{{ product.id }}</td></tr>
-            <tr><th>Name</th><td>{{ product.Name }}</td></tr>
-            <tr><th>Price</th><td>₱{{ product.Price|number_format(2) }}</td></tr>
-            <tr><th>Description</th><td>{{ product.Description }}</td></tr>
-            <tr>
-                <th>Category</th>
-                <td>
-                    {% if product.Category is defined and product.Category %}
-                        {{ product.Category.name }}
+        <div class="ue-card">
+            <header class="ue-card__head">
+                <p class="ue-card__eyebrow">Catalog · #{{ product.id }}</p>
+                <h1 class="ue-card__title">{{ product.name }}</h1>
+                <p class="pd-hero-price">₱{{ product.price|number_format(2) }}</p>
+                <div class="pd-meta">
+                    {% if product.category %}
+                        {% set cat = product.category.name|lower %}
+                        <span class="pd-badge pd-badge--{{ cat in ['burger', 'fries', 'milktea'] ? cat : 'muted' }}">{{ product.category.name }}</span>
                     {% else %}
-                        <span style="color:#777;font-style:italic;">No Category Assigned</span>
+                        <span class="pd-badge pd-badge--muted">Uncategorized</span>
                     {% endif %}
-                </td>
-            </tr>
-            {% if product.Image is defined and product.Image %}
-            <tr>
-                <th>Image</th>
-                <td><img src="{{ asset('uploads/products/' ~ product.Image) }}" alt="{{ product.Name }}" class="product-image"></td>
-            </tr>
-            {% endif %}
-        </table>
-    </div>
+                    <span class="pd-badge pd-badge--stock">{{ product.stock }} in stock</span>
+                </div>
+            </header>
 
-    <div class="action-buttons">
-        <a href="{{ path('app_product_index') }}" class="btn btn-back">Back</a>
-        {% if is_granted('ROLE_ADMIN') or (app.user and product.createdBy and product.createdBy.id == app.user.id) %}
-        <a href="{{ path('app_product_edit', {'id': product.id}) }}" class="btn btn-edit">Edit</a>
-        {{ include('product/_delete_form.html.twig') }}
-        {% endif %}
+            <div class="ue-card__body">
+                <div class="pd-layout pd-layout--show">
+                    <div class="pd-media">
+                        {% if product.image %}
+                            <img src="{{ asset('uploads/images/' ~ product.image) }}" alt="{{ product.name|e('html_attr') }}">
+                        {% else %}
+                            <div class="pd-media__placeholder">
+                                <span aria-hidden="true">🍔</span>
+                                <span>No image</span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <dl class="pd-details">
+                            <div class="pd-detail">
+                                <dt class="pd-detail__label">Description</dt>
+                                <dd class="pd-detail__value">{{ product.description|default('—')|nl2br }}</dd>
+                            </div>
+                            {% if product.datetime %}
+                            <div class="pd-detail">
+                                <dt class="pd-detail__label">Added</dt>
+                                <dd class="pd-detail__value">{{ product.datetime|date('M j, Y · g:i A') }}</dd>
+                            </div>
+                            {% endif %}
+                            {% if product.createdBy %}
+                            <div class="pd-detail">
+                                <dt class="pd-detail__label">Created by</dt>
+                                <dd class="pd-detail__value">{{ product.createdBy.username }}</dd>
+                            </div>
+                            {% endif %}
+                        </dl>
+
+                        <div class="pd-toolbar">
+                            <a href="{{ path('app_product_index') }}" class="ue-btn ue-btn--ghost">Back</a>
+                            {% if is_granted('ROLE_ADMIN') or (app.user and product.createdBy and product.createdBy.id == app.user.id) %}
+                                <a href="{{ path('app_product_edit', {'id': product.id}) }}" class="ue-btn ue-btn--primary">Edit product</a>
+                                {{ include('product/_delete_form.html.twig') }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
+</main>
 {% endblock %}

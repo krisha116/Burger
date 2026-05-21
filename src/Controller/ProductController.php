@@ -177,7 +177,10 @@ final class ProductController extends AbstractController
         $this->denyUnlessOwnerOrAdmin($product);
 
         $form = $this->createForm(ProductType::class, $product);
+        $form->remove('datetime');
         $form->handleRequest($request);
+
+        $nameCategoryMap = $this->buildProductNameCategoryMap($productMenuCategoryService, $categoryRepository);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->applyCategoryFromProductName($product, $productMenuCategoryService, $categoryRepository);
@@ -202,6 +205,7 @@ final class ProductController extends AbstractController
         return $this->render('product/edit.html.twig', [
             'product' => $product,
             'form' => $form,
+            'nameCategoryMap' => $nameCategoryMap,
         ]);
     }
 

@@ -15,16 +15,25 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
-
         api_platform:
             pattern: ^/api
             stateless: true
             provider: app_user_provider
-        
+            user_checker: App\Security\UserChecker
+            json_login:
+                check_path: /api/login
+                username_path: username
+                password_path: password
+                success_handler: App\Security\JWTAuthenticationSuccessHandler
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+            jwt: ~
         main:
             lazy: true
             provider: app_user_provider
-            custom_authenticator: App\Security\LoginAuthenticator
+            custom_authenticators:
+                - App\Security\LoginAuthenticator
+                - App\Security\GoogleAuthenticator
+            entry_point: App\Security\LoginAuthenticator
             user_checker: App\Security\UserChecker
             logout:
                 path: app_logout
@@ -56,7 +65,21 @@ security:
         # Public shop at /, /customer-landing, /menu, /about; login only for checkout & receipt
         - { path: ^/customer-landing/checkout, roles: ["ROLE_USER", "ROLE_STAFF", "ROLE_ADMIN"] }
         - { path: ^/customer-landing/receipt, roles: ["ROLE_USER", "ROLE_STAFF", "ROLE_ADMIN"] }
-        
+
+        - { path: ^/connect/google, roles: PUBLIC_ACCESS }
+        - { path: ^/api/login, roles: PUBLIC_ACCESS}
+        - { path: ^/api/register, roles: PUBLIC_ACCESS }
+        - { path: ^/api/verify-email, roles: PUBLIC_ACCESS }
+        - { path: ^/api/resend-verification-request, roles: PUBLIC_ACCESS }
+        # Mobile API — public catalog & categories (isolated module; see MobileApiController)
+        - { path: ^/api/mobile/ping$, roles: PUBLIC_ACCESS }
+        - { path: ^/api/mobile/categories$, roles: PUBLIC_ACCESS }
+        - { path: ^/api/mobile/menu$, roles: PUBLIC_ACCESS }
+        - { path: ^/api/mobile/products$, roles: PUBLIC_ACCESS }
+        - { path: ^/api/mobile/products/, roles: PUBLIC_ACCESS }
+        - { path: ^/api/mobile/auth/google/start, roles: PUBLIC_ACCESS }
+        - { path: ^/api/mobile/auth/google/complete, roles: PUBLIC_ACCESS }
+        - { path: ^/api, roles: IS_AUTHENTICATED}
 
 when@test:
     security:

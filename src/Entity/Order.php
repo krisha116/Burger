@@ -7,31 +7,56 @@ use App\Repository\OrderRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Delete;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
+#[ApiResource(
+    operations: [
+        new Get(),
+        new GetCollection(),
+        new Post(),
+        new Get(),
+        new Put(),
+        new Delete()
+    ],
+    normalizationContext: ['groups' => ['Order:read']],
+    denormalizationContext: ['groups' => ['Order:write']]
+)]
 #[ORM\Table(name: '`order`')]
 class Order
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['Order:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['Order:read', 'Order:write'])]
     private ?string $Name = null;
 
     #[ORM\Column]
+    #[Groups(['Order:read'])]
     private ?\DateTimeImmutable $createAt = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['Order:read', 'Order:write'])]
     private ?string $Status = null;
 
     #[ORM\Column]
+    #[Groups(['Order:read', 'Order:write'])]
     private ?float $Total = null;
 
     #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['Order:read', 'Order:write'])]
     private ?string $paymentMethod = null;
 
     /**

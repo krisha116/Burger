@@ -78,13 +78,6 @@
                     <dd>{{ log.description|default('—') }}</dd>
                 </div>
             </dl>
-
-            {% if log.affectedData %}
-                <div class="ald-pre-wrap">
-                    <p class="ald-pre-label">Affected data</p>
-                    <pre class="ald-pre" tabindex="0">{{ log.affectedData }}</pre>
-                </div>
-            {% endif %}
         </article>
     </div>
 </main>

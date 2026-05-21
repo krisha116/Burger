@@ -1,6 +1,7 @@
 {% extends 'layout/adventure_landing.html.twig' %}
 
-{% block title %}Create account — Grilled & Bites Burger{% endblock %}
+{% block title %}Create account — Grilled & Bites Burger
+{% endblock %}
 
 {% block stylesheets %}
 {{ parent() }}
@@ -265,6 +266,26 @@
     box-shadow: 0 0 0 3px rgba(245, 197, 24, 0.12);
   }
 
+  .gb-reg-input-wrap {
+    position: relative;
+  }
+
+  .gb-reg-input-icon {
+    position: absolute;
+    left: 0.95rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: rgba(245, 197, 24, 0.9);
+    opacity: 0.9;
+    pointer-events: none;
+  }
+
+  .gb-reg-control--icon {
+    padding-left: 2.65rem;
+  }
+
   .gb-reg-form ul {
     list-style: none;
     margin: 0.4rem 0 0;
@@ -518,13 +539,21 @@
 
       <div class="gb-reg-field">
         {{ form_label(registrationForm.email, 'Email', { label_attr: { class: 'gb-reg-label required' } }) }}
-        {{ form_widget(registrationForm.email, { attr: {
-          class: 'gb-reg-control',
-          placeholder: 'you@example.com',
-          autocomplete: 'email'
-        }}) }}
+        <div class="gb-reg-input-wrap">
+          <svg class="gb-reg-input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v9A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-9Z" stroke="currentColor" stroke-width="1.75" />
+            <path d="m6 8 6 4 6-4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          {{ form_widget(registrationForm.email, { attr: {
+            class: 'gb-reg-control gb-reg-control--icon',
+            placeholder: 'Enter your email',
+            autocomplete: 'email',
+            inputmode: 'email'
+          }}) }}
+        </div>
         {{ form_errors(registrationForm.email) }}
       </div>
+
 
       <div class="gb-reg-field">
         {{ form_label(registrationForm.plainPassword, 'Password', { label_attr: { class: 'gb-reg-label required' } }) }}

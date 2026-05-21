@@ -32,7 +32,7 @@ normalizationContext: ['groups' => ['ActivityLog:read']],
     denormalizationContext: ['groups' => ['ActivityLog:write']]
 
 )]
-#[ORM\ManyToOne(targetEntity: User::class)]
+
 #[ORM\Table(name: 'activity_logs')]
 #[ORM\HasLifecycleCallbacks]
 #[ORM\Index(columns: ['user_id'], name: 'idx_user_id')]
@@ -47,6 +47,7 @@ class ActivityLog
     private ?int $id = null;
 
 
+    #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     #[Groups(['ActivityLog:read', 'ActivityLog:write'])]
     private ?User $user = null;
